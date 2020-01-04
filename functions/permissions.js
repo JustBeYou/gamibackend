@@ -25,7 +25,7 @@ const permissionValidators = {
 };
 
 function validatePermission(permissions, key) {
-    if (permissions == null) return false;
+    if (permissions === null) return false;
     if (!(key in permissions)) return false;
     return permissionValidators[permissions[key].type](permissions[key]);
 }

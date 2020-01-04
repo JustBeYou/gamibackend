@@ -27,10 +27,18 @@ router.get(
     (req, res) => {
         if (permissions.check(req, 'template_permission')) {
             res.json({status: 'ok'});
-        } else {
+        }
+        else {
             res.status(403).json({status: 'forbbiden'});
         }
-    }
+    },
+);
+
+router.get(
+    '/dbTest',
+    (req, res) => {
+        res.json({status: 'ok'});
+    },
 );
 
 module.exports = router;
