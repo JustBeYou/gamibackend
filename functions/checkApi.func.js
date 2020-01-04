@@ -22,4 +22,15 @@ router.get(
     },
 );
 
+router.get(
+    '/check',
+    (req, res) => {
+        if (permissions.check(req, 'template_permission')) {
+            res.json({status: 'ok'});
+        } else {
+            res.status(403).json({status: 'forbbiden'});
+        }
+    }
+);
+
 module.exports = router;
