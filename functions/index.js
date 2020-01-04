@@ -1,11 +1,10 @@
 const loadFunctions = require('firebase-function-tools');
 const functions = require('firebase-functions');
-const admin = require('firebase-admin');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const express = require('express');
+const permissions = require('./permissions');
 
-const config = functions.config().firebase;
 
 const loggerOutput = console;
 function logger(req, res, next) {
@@ -13,7 +12,6 @@ function logger(req, res, next) {
     next();
 }
 
-admin.initializeApp(config);
 loadFunctions(__dirname, exports, '.func.js', func => {
     // register middlewares to all functions
     const app = express();
@@ -21,6 +19,7 @@ loadFunctions(__dirname, exports, '.func.js', func => {
     app.use(logger);
     app.use(cors());
     app.use(bodyParser.json());
+    app.use(permissions.middleware);
     app.use(func);
 
     return functions.https.onRequest(app);
