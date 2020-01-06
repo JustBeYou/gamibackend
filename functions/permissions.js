@@ -22,6 +22,10 @@ const permissionValidators = {
     LIMITED_TIME: permissionProps => {
         return Date.now() < permissionProps.expDate;
     },
+
+    INACTIVE: permissionProps => {
+        return false;
+    },
 };
 
 function validatePermission(permissions, key) {
@@ -77,4 +81,6 @@ module.exports = {
     check,
     requestField,
     tokenHeader,
+    validatePermission,
+    permissionValidators,
 };
