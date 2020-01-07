@@ -23,7 +23,7 @@ const permissionValidators = {
         return Date.now() < permissionProps.expDate;
     },
 
-    INACTIVE: permissionProps => {
+    INACTIVE: () => {
         return false;
     },
 };
@@ -42,9 +42,7 @@ async function middleware(req, res, next) {
     }
     else {
         const token = req.header(tokenHeader);
-        const permissions = await getTokenPermissions(token);
-
-        req[requestField] = permissions;
+        req[requestField] = await getTokenPermissions(token);
     }
 
     next();

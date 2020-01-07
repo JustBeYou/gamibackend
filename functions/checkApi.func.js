@@ -1,7 +1,10 @@
 const express = require('express');
 const permissions = require('./permissions.js');
 const accessCodes = require('./accessCodes.js');
-const models = require('./models.js');
+const {dbConnection} = require('./config.js');
+const {Identifier} = require('./models/identifier.js');
+const {Module} = require('./models/module.js');
+const {Collection} = require('./models/collection.js');
 
 const router = express.Router();
 router.get('/', (req, res) => {
@@ -39,7 +42,7 @@ router.get(
 router.get(
     '/dbTest',
     (req, res) => {
-        models.dbConnection.sync({alter: true});
+        dbConnection.sync({alter: true});
         res.json({status: 'ok'});
     },
 );
