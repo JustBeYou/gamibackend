@@ -28,7 +28,7 @@ function isAssociated(codeObj, token) {
 
 async function associate(code, token) {
     const codeDocRef = firestore.collection('accessCodes').doc(code);
-        const result = await firestore.runTransaction(async transaction => {
+    const result = await firestore.runTransaction(async transaction => {
         const codeRef = await transaction.get(codeDocRef);
         if (!codeRef.exists) return false;
 
@@ -44,6 +44,10 @@ async function associate(code, token) {
     });
 
     return result;
+}
+
+function canAcccessCollection(codeObj, collection) {
+    return collection === codeObj.parentCollection;
 }
 
 module.exports = {
