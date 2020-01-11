@@ -8,8 +8,8 @@ const router = express.Router();
 async function updateCollection(id, properties, token, isAdmin) {
     const collectionRef = await Collection.findOne({
         where: {
-            id: id,
-        }
+            id,
+        },
     });
 
     if (collectionRef === null) {
@@ -41,7 +41,7 @@ router.post(
         errorHandlers.safeResponse(res, async () => {
             if (Array.isArray(req.body.data)) {
                 result = [];
-                for (toUpdate of req.body.data) {
+                for (const toUpdate of req.body.data) {
                     result.push(await updateCollection(
                         toUpdate.id,
                         toUpdate.update,
@@ -49,7 +49,8 @@ router.post(
                         isAdmin,
                     ));
                 }
-            } else {
+            }
+            else {
                 result = await updateCollection(
                     req.body.data.id,
                     req.body.data.update,
@@ -58,7 +59,7 @@ router.post(
                 );
             }
 
-            res.json({status: 'ok', result: result});
+            res.json({status: 'ok', result});
         });
     },
 );

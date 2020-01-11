@@ -8,7 +8,7 @@ router.post(
     permissions.necessary(['IDENTIFIERS']),
     (req, res) => {
         res.json({status: 'ok'});
-    }
+    },
 );
 
 module.exports = router;

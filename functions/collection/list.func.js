@@ -24,9 +24,9 @@ router.post(
             const query = queryHelpers.parseQuery(req.body.data.query, tokenFilter);
 
             const result = await Collection.findAll(query);
-            res.json({status: 'ok', result: result});
+            res.json({status: 'ok', result});
         });
-    }
+    },
 );
 
 module.exports = router;

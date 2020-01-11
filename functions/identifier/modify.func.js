@@ -8,15 +8,15 @@ const router = express.Router();
 async function updateIdentifier(id, properties, token, isAdmin) {
     const identifierRef = await Identifier.findOne({
         where: {
-            id: id,
-        }
+            id,
+        },
     });
 
     if (identifierRef === null) {
         throw new Error('identifier not found');
     }
 
-    if (identifierRef.parentToken != token && !isAdmin) {
+    if (identifierRef.parentToken !== token && !isAdmin) {
         throw new Error('not enough permissions');
     }
 
@@ -41,7 +41,7 @@ router.post(
         errorHandlers.safeResponse(res, async () => {
             if (Array.isArray(req.body.data)) {
                 result = [];
-                for (toUpdate of req.body.data) {
+                for (const toUpdate of req.body.data) {
                     result.push(await updateIdentifier(
                         toUpdate.id,
                         toUpdate.update,
@@ -49,7 +49,8 @@ router.post(
                         isAdmin,
                     ));
                 }
-            } else {
+            }
+            else {
                 result = await updateIdentifier(
                     req.body.data.id,
                     req.body.data.update,
@@ -58,7 +59,7 @@ router.post(
                 );
             }
 
-            res.json({status: 'ok', result: result});
+            res.json({status: 'ok', result});
         });
     },
 );

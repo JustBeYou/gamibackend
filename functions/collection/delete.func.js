@@ -9,7 +9,7 @@ router.post(
     permissions.necessary([]),
     (req, res) => {
         res.json({status: 'ok'});
-    }
+    },
 );
 
 module.exports = router;

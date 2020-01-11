@@ -18,11 +18,11 @@ router.post(
             const created = await Identifier.validateAndCreate(
                 req.body.data,
                 allowCustom,
-                permissions.getReqToken(req)
+                permissions.getReqToken(req),
             );
             res.json({status: 'ok', result: created});
         });
-    }
+    },
 );
 
 module.exports = router;

@@ -6,10 +6,10 @@ function timestampFilter(alterationType, startTime, endTime) {
     const filter = {};
     console.log(alterationType);
     filter[alterationType] = {
-                [Op.and]: {
-                    [Op.gte]: startTime,
-                    [Op.lte]: endTime,
-                }
+        [Op.and]: {
+            [Op.gte]: startTime,
+            [Op.lte]: endTime,
+        },
     };
     return filter;
 }
@@ -26,7 +26,7 @@ function parseQuery(query, token) {
             ...timestampFilter(
                 query.alterationType,
                 query.startTime,
-                query.endTime)
+                query.endTime),
         };
     }
 
@@ -42,7 +42,7 @@ function parseQueryArray(queries, token) {
     let finalQueries = [];
     for (let i = 0; i < queries.length; i++) {
         finalQueries.push(
-            parseQuery(queries[i], token)
+            parseQuery(queries[i], token),
         );
     }
 

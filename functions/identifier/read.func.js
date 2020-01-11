@@ -7,7 +7,7 @@ const router = express.Router();
 
 async function readIdentifier(identifier) {
     const identifierRef = await Identifier.findOne({
-        where: identifier
+        where: identifier,
     });
     return Identifier.getCollection(identifierRef);
 }
@@ -25,13 +25,14 @@ router.post(
                 for (const identifier of req.body.data.query) {
                     result.push(await readIdentifier(identifier));
                 }
-            } else {
+            }
+            else {
                 result = await readIdentifier(req.body.data.query);
             }
 
-            res.json({status: 'ok', result: result});
+            res.json({status: 'ok', result});
         });
-    }
+    },
 );
 
 module.exports = router;

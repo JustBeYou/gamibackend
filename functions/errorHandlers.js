@@ -1,6 +1,6 @@
-function safeResponse(response, action) {
+async function safeResponse(response, action) {
     try {
-        action();
+        await action();
     }
     catch (error) {
         response.status(400).json({status: error.toString()});

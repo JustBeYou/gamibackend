@@ -20,9 +20,9 @@ router.post(
         errorHandlers.safeResponse(res, async () => {
             req.body.data.parentToken = permissions.getReqToken(req);
             const result = await Collection.create(req.body.data);
-            res.json({status: 'ok', result: result});
+            res.json({status: 'ok', result});
         });
-    }
+    },
 );
 
 module.exports = router;

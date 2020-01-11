@@ -29,14 +29,15 @@ router.post(
                 for (let i = 0; i < query.length; i++) {
                     result.push(await Identifier.findAll(query[i]));
                 }
-                res.json({status: 'ok', result: result});
-            } else {
+                res.json({status: 'ok', result});
+            }
+            else {
                 query = queryHelpers.parseQuery(req.body.data.query, tokenFilter);
                 const result = await Identifier.findAll(query);
-                res.json({status: 'ok', result: result});
+                res.json({status: 'ok', result});
             }
         });
-    }
+    },
 );
 
 module.exports = router;

@@ -25,8 +25,8 @@ const identifierModel = {
 // TODO: decide where to store object logic (MySQL column now, Firestore in the future maybe)
 // for the moment object logic is stored inside a column in the Identifier object (JSON string)
 // maybe it's better to store it inside firestore
-function getLogicObject(refercence) {
-    return JSON.parse(refercence.get('logic'));
+function getLogicObject(reference) {
+    return JSON.parse(reference.get('logic'));
 }
 
 /*
@@ -68,14 +68,14 @@ const collectionGetters = {
 };
 
 class Identifier extends Model {
-    static getCollection(refercence) {
-        if (refercence === null) return null;
-        const logicObject = getLogicObject(refercence);
-        return collectionGetters[refercence.behavior](logicObject);
+    static getCollection(reference) {
+        if (reference === null) return null;
+        const logicObject = getLogicObject(reference);
+        return collectionGetters[reference.behavior](logicObject);
     }
 
-    static modify(refercence, properties, token) {
-        if (Array.isArray(refercence) && Array.isArray(properties)) {
+    static modify(reference, properties, token) {
+        if (Array.isArray(reference) && Array.isArray(properties)) {
             if (token !== undefined && token !== null) {
                 for (let i = 0; i < properties.length; i++) {
                     properties[i].updatedByToken = token;
@@ -83,7 +83,7 @@ class Identifier extends Model {
             }
 
             for (let i = 0; i < reference.length; i++) {
-                refercence[i].update(properties[i]);
+                reference[i].update(properties[i]);
             }
 
             return ;
@@ -92,7 +92,7 @@ class Identifier extends Model {
         if (token !== undefined && token !== null) {
             properties.updatedByToken = token;
         }
-        refercence.update(properties);
+        reference.update(properties);
     }
 
     static validateAndCreate(properties, custom, token) {
