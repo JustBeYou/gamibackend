@@ -73,6 +73,10 @@ function check(req, permission) {
     return validatePermission(req[requestField], permission);
 }
 
+function getReqToken(req) {
+    return req.header(tokenHeader);
+}
+
 module.exports = {
     middleware,
     necessary,
@@ -81,4 +85,5 @@ module.exports = {
     tokenHeader,
     validatePermission,
     permissionValidators,
+    getReqToken,
 };
