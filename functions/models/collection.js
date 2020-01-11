@@ -6,6 +6,8 @@ const collectionModel = {
     summary: DataTypes.TEXT,
     thumbnail: DataTypes.STRING, // TODO: change this
 
+    parentToken: DataTypes.UUID,
+    updatedByToken: DataTypes.UUID,
     // PUBLIC, PRIVATE
     accessStatus: DataTypes.STRING,
     // PASSWORD, ACCESS_CODE

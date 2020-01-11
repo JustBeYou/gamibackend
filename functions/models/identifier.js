@@ -113,19 +113,6 @@ class Identifier extends Model {
         return Identifier.create(properties, {validate});
     }
 
-    // alterationType - createdAt, updatedAt
-    // TODO: implement filter for timestamp deletedAt
-    static timestampFilter(alterationType, startTime, endTime) {
-        const filter = {};
-        filter[alterationType] = {
-                    [Op.and]: {
-                        [Op.gte]: startTime,
-                        [Op.lte]: endTime,
-                    }
-        };
-        return filter;
-    }
-
     static moveToTrash(reference, token) {
         // TODO: not sure how to implement deletion procedure
     }
