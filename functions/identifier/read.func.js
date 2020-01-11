@@ -1,6 +1,7 @@
 const express = require('express');
 const permissions = require('../permissions.js');
 const {Identifier} = require('../models/identifier.js');
+const errorHandlers = require('../errorHandlers.js');
 
 const router = express.Router();
 
@@ -13,15 +14,13 @@ async function readIdentifier(identifier) {
 
 router.post(
     '/',
-    permissions.necessary([]),
+    [
+        permissions.necessary([]),
+        errorHandlers.requestEmptyQuery,
+    ],
     async (req, res) => {
-        if (req.body.data === undefined || req.body.data.query === undefined) {
-            res.status(400).json({status: 'empty body'});
-            return ;
-        }
-
-        let result = [];
-        try {
+        errorHandlers.safeResponse(res, async () => {
+            let result = [];
             if (Array.isArray(req.body.data.query)) {
                 for (const identifier of req.body.data.query) {
                     result.push(await readIdentifier(identifier));
@@ -31,9 +30,7 @@ router.post(
             }
 
             res.json({status: 'ok', result: result});
-        } catch (error) {
-            res.status(400).json({status: error.toString()});
-        }
+        });
     }
 );
 
