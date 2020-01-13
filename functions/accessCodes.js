@@ -1,6 +1,29 @@
 const firestore = require('./config.js').firestore;
 const permissions = require('./permissions.js');
 
+async function createAccessCode(properties) {
+    const newCode = await firestore.collection('accessCodes').add(properties);
+    return newCode.id;
+}
+
+async function listAccessCodes(id) {
+    const docs = await firestore.collection('accessCodes').where('parentCollection', '==', id).get();
+
+    let result = [];
+    docs.forEach(doc => {
+        result.push({id: doc.id, ...doc.data()});
+    });
+    return result;
+}
+
+async function deleteAllAccessCodes(id) {
+    const docs = await firestore.collection('accessCodes').where('parentCollection', '==', id).get();
+
+    docs.forEach(doc => {
+        doc.ref.delete();
+    });
+}
+
 async function getAccessCode(code) {
     const codeRef = await firestore.collection('accessCodes').doc(code).get();
 
@@ -56,4 +79,7 @@ module.exports = {
     canAssociateAnotherToken,
     associate,
     validateAccessCode,
+    createAccessCode,
+    listAccessCodes,
+    deleteAllAccessCodes,
 };
