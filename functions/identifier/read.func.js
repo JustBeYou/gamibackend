@@ -18,7 +18,7 @@ router.post(
         permissions.necessary([]),
         errorHandlers.requestEmptyQuery,
     ],
-    async (req, res) => {
+    (req, res) => {
         errorHandlers.safeResponse(res, async () => {
             let result = [];
             if (Array.isArray(req.body.data.query)) {

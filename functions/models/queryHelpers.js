@@ -4,7 +4,6 @@ const {Op} = require('sequelize');
 // TODO: implement filter for timestamp deletedAt
 function timestampFilter(alterationType, startTime, endTime) {
     const filter = {};
-    console.log(alterationType);
     filter[alterationType] = {
         [Op.and]: {
             [Op.gte]: startTime,
@@ -14,8 +13,9 @@ function timestampFilter(alterationType, startTime, endTime) {
     return filter;
 }
 
-function parseQuery(query, token) {
+function parseQuery(query, currentToken, allowCustomToken) {
     let finalQuery = {...query};
+
     if (query.alterationType !== undefined) {
         delete finalQuery.alterationType;
         delete finalQuery.startTime;
@@ -30,7 +30,13 @@ function parseQuery(query, token) {
         };
     }
 
-    finalQuery.parentToken = token;
+    if (query.parentToken === null && !allowCustomToken) {
+        query.parentToken = currentToken;
+    }
+    else if (query.parentToken !== currentToken && !allowCustomToken) {
+        throw new Error('not enough permissions');
+    }
+
     finalQuery = {
         where: finalQuery,
     };
@@ -38,11 +44,11 @@ function parseQuery(query, token) {
     return finalQuery;
 }
 
-function parseQueryArray(queries, token) {
+function parseQueryArray(queries, currentToken, allowCustomToken) {
     let finalQueries = [];
-    for (let i = 0; i < queries.length; i++) {
+    for (const query of queries) {
         finalQueries.push(
-            parseQuery(queries[i], token),
+            parseQuery(query, currentToken, allowCustomToken),
         );
     }
 

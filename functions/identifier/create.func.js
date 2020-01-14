@@ -11,7 +11,7 @@ router.post(
         permissions.necessary(['IDENTIFIERS']),
         errorHandlers.requestEmptyData,
     ],
-    async (req, res) => {
+    (req, res) => {
         const allowCustom = permissions.check(req, 'ADMIN_IDENTIFIERS') || permissions.check(req, 'CUSTOM_IDENTIFIERS');
 
         errorHandlers.safeResponse(res, async () => {

@@ -2,6 +2,7 @@ const express = require('express');
 const permissions = require('../permissions.js');
 const {Collection} = require('../models/collection.js');
 const errorHandlers = require('../errorHandlers.js');
+const collectionErrorHandlers = require('./errorHandlers.js');
 
 const router = express.Router();
 
@@ -12,20 +13,24 @@ async function updateCollection(id, properties, token, isAdmin) {
         },
     });
 
-    if (collectionRef === null) {
-        throw new Error('collection not found');
-    }
-
-    if (collectionRef.parentToken != token && !isAdmin) {
-        throw new Error('not enough permissions');
-    }
-
-    if (properties.id !== undefined) {
-        throw new Error('id is immutable');
-    }
+    collectionErrorHandlers.validateReference(collectionRef, token, isAdmin);
+    collectionErrorHandlers.validateImmutable(properties);
 
     properties.updatedByToken = token;
     return collectionRef.update(properties);
+}
+
+async function updateCollectionArray(array, token, isAdmin) {
+    let result = [];
+    for (const toUpdate of array) {
+        result.push(await updateCollection(
+            toUpdate.id,
+            toUpdate.update,
+            token,
+            isAdmin,
+        ));
+    }
+    return result;
 }
 
 router.post(
@@ -34,27 +39,25 @@ router.post(
         permissions.necessary(['ITEMS']),
         errorHandlers.requestEmptyData,
     ],
-    async (req, res) => {
+    (req, res) => {
         const isAdmin = permissions.check(req, 'ADMIN_ITEMS');
+        const currentToken = permissions.getReqToken(req);
+
 
         let result = null;
         errorHandlers.safeResponse(res, async () => {
             if (Array.isArray(req.body.data)) {
-                result = [];
-                for (const toUpdate of req.body.data) {
-                    result.push(await updateCollection(
-                        toUpdate.id,
-                        toUpdate.update,
-                        permissions.getReqToken(req),
-                        isAdmin,
-                    ));
-                }
+                result = await updateCollectionArray(
+                    req.body.data,
+                    currentToken,
+                    isAdmin,
+                );
             }
             else {
                 result = await updateCollection(
                     req.body.data.id,
                     req.body.data.update,
-                    permissions.getReqToken(req),
+                    currentToken,
                     isAdmin,
                 );
             }

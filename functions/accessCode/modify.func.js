@@ -12,7 +12,7 @@ router.post(
     ],
     (req, res) => {
 
-        errorHandlers.safeResponse(res, async () => {
+        errorHandlers.safeResponse(res, () => {
             res.json({status: 'ok'});
         });
     },

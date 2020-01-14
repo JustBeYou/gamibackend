@@ -1,4 +1,4 @@
-const {Model, DataTypes, Op} = require('sequelize');
+const {Model, DataTypes} = require('sequelize');
 const {dbConnection} = require('../config.js');
 
 // createdAt, updatedAt, deletedAt are created by default
@@ -8,7 +8,7 @@ const identifierModel = {
         type: DataTypes.TEXT,
         unique: true,
         validate: {
-            is: /https:\/\/gamiworld.com\/share\/([a-zA-Z0-9\-\_]{5,})/gi,
+            is: /https:\/\/gamiworld.com\/share\/([a-zA-Z0-9\-_]{5,})/gi,
         },
     },
     parentToken: DataTypes.UUID,
@@ -77,13 +77,13 @@ class Identifier extends Model {
     static modify(reference, properties, token) {
         if (Array.isArray(reference) && Array.isArray(properties)) {
             if (token !== undefined && token !== null) {
-                for (let i = 0; i < properties.length; i++) {
-                    properties[i].updatedByToken = token;
+                for (const index in properties) {
+                    properties[index].updatedByToken = token;
                 }
             }
 
-            for (let i = 0; i < reference.length; i++) {
-                reference[i].update(properties[i]);
+            for (const index in reference) {
+                reference[index].update(properties[index]);
             }
 
             return ;
@@ -99,8 +99,8 @@ class Identifier extends Model {
         const validate = !custom;
         if (Array.isArray(properties)) {
             if (token !== undefined && token !== null) {
-                for (let i = 0; i < properties.length; i++) {
-                    properties[i].parentToken = token;
+                for (const index in properties) {
+                    properties[index].parentToken = token;
                 }
             }
 

@@ -3,24 +3,18 @@ const permissions = require('../permissions.js');
 const errorHandlers = require('../errorHandlers.js');
 const express = require('express');
 const {Collection} = require('../models/collection.js');
+const collectionErrorHandlers = require('../collection/errorHandlers.js');
 
 const router = express.Router();
 
 async function parse(properties, token, isAdmin) {
     const collectionRef = await Collection.findOne({
         where: {
-             id: properties.parentCollection,
-        }
+            id: properties.parentCollection,
+        },
     });
 
-    if (collectionRef === null) {
-        throw new Error('Collection not found');
-    }
-
-    if (collectionRef.parentToken !== token && !isAdmin) {
-        throw new Error('not enough permissions');
-    }
-
+    collectionErrorHandlers.validateReference(collectionRef, token, isAdmin);
     properties.parentCollection = collectionRef.id;
     return accessCodes.createAccessCode(properties);
 }
@@ -28,7 +22,7 @@ async function parse(properties, token, isAdmin) {
 async function parseArray(properties, token, isAdmin) {
     let result = [];
     for (const property of properties) {
-        reslut.push(await parse(property, token, isAdmin));
+        result.push(await parse(property, token, isAdmin));
     }
 
     return result;
@@ -48,11 +42,12 @@ router.post(
             let result = null;
             if (Array.isArray(req.body.data)) {
                 result = await parseArray(req.body.data, token, isAdmin);
-            } else {
+            }
+            else {
                 result = await parse(req.body.data, token, isAdmin);
             }
 
-            res.json({status: 'ok', result: result});
+            res.json({status: 'ok', result});
         });
     },
 );

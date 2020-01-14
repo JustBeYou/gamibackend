@@ -13,29 +13,25 @@ router.post(
         permissions.necessary(['IDENTIFIERS']),
         errorHandlers.requestEmptyQuery,
     ],
-    async (req, res) => {
+    (req, res) => {
         const allowCustomToken = permissions.check(req, 'ADMIN_IDENTIFIERS');
-
-        let tokenFilter = permissions.getReqToken(req);
-        if (allowCustomToken && req.body.data.token !== undefined) {
-            tokenFilter = req.body.token;
-        }
+        const currentToken = permissions.getReqToken(req);
 
         errorHandlers.safeResponse(res, async () => {
-            let query = {};
+            let result = null;
             if (Array.isArray(req.body.data.query)) {
-                query = queryHelpers.parseQueryArray(req.body.data.query, tokenFilter);
-                let result = [];
-                for (let i = 0; i < query.length; i++) {
-                    result.push(await Identifier.findAll(query[i]));
+                result = [];
+                const queries = queryHelpers.parseQueryArray(req.body.data.query, currentToken, allowCustomToken);
+                for (const index in queries) {
+                    result.push(await Identifier.findAll(queries[index]));
                 }
-                res.json({status: 'ok', result});
             }
             else {
-                query = queryHelpers.parseQuery(req.body.data.query, tokenFilter);
-                const result = await Identifier.findAll(query);
-                res.json({status: 'ok', result});
+                const query = queryHelpers.parseQuery(req.body.data.query, currentToken, allowCustomToken);
+                result = await Identifier.findAll(query);
             }
+
+            res.json({status: 'ok', result});
         });
     },
 );

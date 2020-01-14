@@ -11,7 +11,7 @@ router.post(
         permissions.necessary(['ITEMS']),
         errorHandlers.requestEmptyData,
     ],
-    async (req, res) => {
+    (req, res) => {
         if (req.body.data.modules !== undefined) {
             delete req.body.data.modules;
             // TODO: implement module creation

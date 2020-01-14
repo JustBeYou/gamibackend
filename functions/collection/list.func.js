@@ -12,16 +12,12 @@ router.post(
         permissions.necessary([]),
         errorHandlers.requestEmptyQuery,
     ],
-    async (req, res) => {
+    (req, res) => {
         const allowCustomToken = permissions.check(req, 'ADMIN_ITEMS');
-
-        let tokenFilter = permissions.getReqToken(req);
-        if (allowCustomToken && req.body.data.token !== undefined) {
-            tokenFilter = req.body.token;
-        }
+        const currentToken = permissions.getReqToken(req);
 
         errorHandlers.safeResponse(res, async () => {
-            const query = queryHelpers.parseQuery(req.body.data.query, tokenFilter);
+            const query = queryHelpers.parseQuery(req.body.data.query, currentToken, allowCustomToken);
 
             const result = await Collection.findAll(query);
             res.json({status: 'ok', result});
