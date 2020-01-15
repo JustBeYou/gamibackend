@@ -1,5 +1,6 @@
 const {Model, DataTypes} = require('sequelize');
 const {dbConnection} = require('../config.js');
+const {Module} = require('./module.js');
 
 const collectionModel = {
     title: DataTypes.STRING,
@@ -13,6 +14,12 @@ const collectionModel = {
     // PASSWORD, ACCESS_CODE
     protectionType: DataTypes.STRING,
     password: DataTypes.STRING,
+
+    moduleCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+    },
 };
 class Collection extends Model {}
 Collection.init(collectionModel,
@@ -21,6 +28,8 @@ Collection.init(collectionModel,
         modelName: 'collection',
     },
 );
+
+Collection.hasMany(Module);
 
 module.exports = {
     Collection,
