@@ -1,11 +1,93 @@
 const {Model, DataTypes} = require('sequelize');
 const {dbConnection} = require('../config.js');
 
-const moduleModel = {
-    index: DataTypes.INTEGER,
+const moduleImageModel = {};
+class ModuleImage extends Model {}
+ModuleImage.init(moduleImageModel,
+    {
+        sequelize: dbConnection,
+        modelName: 'module_image',
+    },
+);
 
+const moduleVideoModel = {};
+class ModuleVideo extends Model {}
+ModuleVideo.init(moduleVideoModel,
+    {
+        sequelize: dbConnection,
+        modelName: 'module_video',
+    },
+);
+
+const moduleListModel = {};
+class ModuleList extends Model {}
+ModuleList.init(moduleListModel,
+    {
+        sequelize: dbConnection,
+        modelName: 'module_list',
+    },
+);
+
+const moduleContactModel = {};
+class ModuleContact extends Model {}
+ModuleContact.init(moduleContactModel,
+    {
+        sequelize: dbConnection,
+        modelName: 'module_contact',
+    },
+);
+
+const moduleTextModel = {
+    text: DataTypes.TEXT,
 };
-class Module extends Model {}
+class ModuleText extends Model {}
+ModuleText.init(moduleTextModel,
+    {
+        sequelize: dbConnection,
+        moduleName: 'module_text',
+    },
+);
+
+const classOfModuleType = {
+    IMAGE: ModuleImage,
+    VIDEO: ModuleVideo,
+    LIST: ModuleList,
+    CONTACT: ModuleContact,
+    TEXT: ModuleText,
+};
+
+const moduleModel = {
+    index: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        unique: true,
+        //autoIncrement: true,
+    },
+    // IMAGE, VIDEO, LIST, CONTACT
+    type: DataTypes.STRING,
+};
+class Module extends Model {
+    static async concreteCreate(baseModuleProperties, concreteModuleProperties) {
+        const moduleTypeClass = classOfModuleType[baseModuleProperties.type];
+
+        if (moduleTypeClass === undefined) {
+            throw new Error('unkown module type');
+        }
+
+        const base = await Module.create(baseModuleProperties);
+        concreteModuleProperties.moduleId = base.id;
+        const concrete = await moduleTypeClass.create(concreteModuleProperties);
+        return {base, concrete};
+    }
+
+    static async typedCreate(baseModuleProperties, concreteModuleProperties, collectionRef) {
+        const result = await Module.concreteCreate(baseModuleProperties, concreteModuleProperties);
+        await collectionRef.update({
+            moduleCount: collectionRef.moduleCount + 1,
+        });
+        return result;
+    }
+}
 Module.init(moduleModel,
     {
         sequelize: dbConnection,
@@ -13,6 +95,17 @@ Module.init(moduleModel,
     },
 );
 
+Module.hasOne(ModuleImage);
+Module.hasOne(ModuleVideo);
+Module.hasOne(ModuleList);
+Module.hasOne(ModuleContact);
+Module.hasOne(ModuleText);
+
 module.exports = {
     Module,
+    ModuleImage,
+    ModuleVideo,
+    ModuleList,
+    ModuleContact,
+    classOfModuleType,
 };
