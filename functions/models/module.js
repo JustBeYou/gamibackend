@@ -65,6 +65,8 @@ const moduleModel = {
     },
     // IMAGE, VIDEO, LIST, CONTACT
     type: DataTypes.STRING,
+    parentToken: DataTypes.UUID,
+    updatedByToken: DataTypes.UUID,
 };
 class Module extends Model {
     static async concreteCreate(baseModuleProperties, concreteModuleProperties) {

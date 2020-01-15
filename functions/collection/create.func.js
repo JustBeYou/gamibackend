@@ -49,7 +49,7 @@ router.post(
         }
 
         errorHandlers.safeResponse(res, async () => {
-            req.body.data.parentToken = permissions.getReqToken(req);
+            collectionData.parentToken = permissions.getReqToken(req);
             const collectionRef = await Collection.create(collectionData);
             const createdModules = await createModules(
                 req,

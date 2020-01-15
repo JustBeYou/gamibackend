@@ -15,7 +15,25 @@ function isAllowedToCreateModule(req, moduleType) {
     }
 }
 
+function validateReference(reference, token, isAdmin) {
+    if (reference === null) {
+        throw new Error('Module not found');
+    }
+
+    if (reference.parentToken !== token && !isAdmin) {
+        throw new Error('not enough permissions');
+    }
+}
+
+function validateImmutable(properties) {
+    if (properties.id !== undefined || properties.type !== undefined) {
+        throw new Error('id and type are immutable');
+    }
+}
+
 module.exports = {
     permissionsOfModuleType,
     isAllowedToCreateModule,
+    validateReference,
+    validateImmutable,
 };
