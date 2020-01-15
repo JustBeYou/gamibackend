@@ -7,6 +7,7 @@ const identifierModel = {
     key: {
         type: DataTypes.TEXT,
         unique: true,
+        allowNull: false,
         validate: {
             is: /https:\/\/gamiworld.com\/share\/([a-zA-Z0-9\-_]{5,})/gi,
         },
@@ -72,27 +73,6 @@ class Identifier extends Model {
         if (reference === null) return null;
         const logicObject = getLogicObject(reference);
         return collectionGetters[reference.behavior](logicObject);
-    }
-
-    static modify(reference, properties, token) {
-        if (Array.isArray(reference) && Array.isArray(properties)) {
-            if (token !== undefined && token !== null) {
-                for (const index in properties) {
-                    properties[index].updatedByToken = token;
-                }
-            }
-
-            for (const index in reference) {
-                reference[index].update(properties[index]);
-            }
-
-            return ;
-        }
-
-        if (token !== undefined && token !== null) {
-            properties.updatedByToken = token;
-        }
-        reference.update(properties);
     }
 
     static validateAndCreate(properties, custom, token) {
