@@ -73,7 +73,7 @@ const moduleModel = {
     updatedByToken: DataTypes.UUID,
 };
 class Module extends Model {
-    static async concreteCreate(baseModuleProperties, concreteModuleProperties) {
+    static async concreteCreate(baseModuleProperties, concreteModuleProperties, transaction) {
         const moduleTypeClass = classOfModuleType[baseModuleProperties.type];
 
         if (moduleTypeClass === undefined) {
@@ -81,22 +81,26 @@ class Module extends Model {
         }
 
         baseModuleProperties[moduleTypeClass.name] = concreteModuleProperties;
-        console.log(baseModuleProperties);
         const result = await Module.create(
             baseModuleProperties,
             {
-                include: moduleTypeClass
+                include: moduleTypeClass,
+                transaction: transaction,
             }
         );
         return result;
     }
 
     static async typedCreate(baseModuleProperties, concreteModuleProperties, collectionRef) {
-        const result = await Module.concreteCreate(baseModuleProperties, concreteModuleProperties);
-        await collectionRef.update({
-            moduleCount: collectionRef.moduleCount + 1,
+        return await dbConnection.transaction(async (transaction) => {
+            const result = await Module.concreteCreate(baseModuleProperties, concreteModuleProperties, transaction);
+            await collectionRef.update({
+                moduleCount: collectionRef.moduleCount + 1,
+            }, {
+                transaction: transaction,
+            });
+            return result;
         });
-        return result;
     }
 }
 Module.init(moduleModel,
