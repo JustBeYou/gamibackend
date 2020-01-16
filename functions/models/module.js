@@ -143,12 +143,22 @@ Module.init(moduleModel,
 );
 
 Module.hasOne(ModuleImage);
+ModuleImage.belongsTo(Module);
+
 Module.hasOne(ModuleVideo);
+ModuleVideo.belongsTo(Module);
+
 Module.hasOne(ModuleList);
+ModuleList.belongsTo(Module);
+
 Module.hasOne(ModuleContact);
+ModuleContact.belongsTo(Module);
+
 Module.hasOne(ModuleText);
+ModuleText.belongsTo(Module);
 
 ModuleContact.hasMany(ModuleContactEntry);
+ModuleContactEntry.belongsTo(ModuleContact);
 
 module.exports = {
     Module,

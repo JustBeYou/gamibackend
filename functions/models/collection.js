@@ -30,6 +30,7 @@ Collection.init(collectionModel,
 );
 
 Collection.hasMany(Module);
+Module.belongsTo(Collection);
 
 module.exports = {
     Collection,
