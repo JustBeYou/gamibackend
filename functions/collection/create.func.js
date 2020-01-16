@@ -6,6 +6,7 @@ const moduleQueryHelpers = require('../module/queryHelpers.js');
 const moduleErrorHandlers = require('../module/errorHandlers.js');
 const errorHandlers = require('../errorHandlers.js');
 const {dbConnection} = require('../config.js');
+const passwordHash = require('password-hash');
 
 const router = express.Router();
 
@@ -54,7 +55,11 @@ router.post(
         errorHandlers.safeResponse(res, async () => {
             collectionData.parentToken = permissions.getReqToken(req);
 
-            const result = await dbConnection.transaction(async (transaction) => {            
+            const result = await dbConnection.transaction(async (transaction) => {
+                if (collectionData.password !== undefined) {
+                    collectionData.password = passwordHash.generate(collectionData.password);
+                }
+
                 const collectionRef = await Collection.create(
                     collectionData,
                     {

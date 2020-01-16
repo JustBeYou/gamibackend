@@ -38,7 +38,7 @@ async function getAccessCode(code) {
 async function validateAccessCode(code) {
     const codeObj = await getAccessCode(code);
     if (codeObj === null) return false;
-    return permissions.permissionValidators[code.type](codeObj);
+    return permissions.permissionValidators[codeObj.type](codeObj);
 }
 
 function canAssociateAnotherToken(codeObj) {
@@ -73,6 +73,23 @@ function canAcccessCollection(codeObj, collection) {
     return collection === codeObj.parentCollection;
 }
 
+async function verifyAccessCode(reference, accessCode, token) {
+    const codeObj = await accessCodes.getAccessCode(accessCode);
+    if (accessCodes.canAcccessCollection(codeObj, reference) === false) {
+        throw new Error('access code is not related to the collection');
+    }
+
+    const associated = await accessCodes.associate(accessCode, token);
+    if (associated === false) {
+        throw new Error('associated tokens max limit exceeded');
+    }
+
+    const isValid = permissions.permissionValidators[codeObj.type](codeObj);
+    if (isValid === false) {
+        throw new Error('access code is expirated');
+    }
+}
+
 module.exports = {
     getAccessCode,
     isAssociated,
@@ -82,4 +99,6 @@ module.exports = {
     createAccessCode,
     listAccessCodes,
     deleteAllAccessCodes,
+    canAcccessCollection,
+    verifyAccessCode,
 };

@@ -1,4 +1,24 @@
 const {Collection} = require('../models/collection.js');
+const passwordHash = require('password-hash');
+const accessCodes = require('../accessCodes.js');
+
+async function validatePermissions(reference, accessCode, token, isAdmin) {
+    if (reference.parentToken === token || isAdmin) {
+        return ;
+    }
+
+    if (reference.accessStatus === 'PUBLIC') {
+        return ;
+    }
+    
+    if (reference.protectionType === 'ACCESS_CODE') {
+        await accessCodes.verifyAccessCode(reference, accessCode, token);
+    } else if (reference.protectionType === 'PASSWORD') {
+        if (passwordHash.validatePassword(accessCode, reference.password) === false) {
+            throw new Error('invalid password');
+        }
+    }
+}
 
 function validateReference(reference, token, isAdmin) {
     if (reference === null) {
@@ -29,4 +49,5 @@ module.exports = {
     validateReference,
     validateReferenceById,
     validateImmutable,
+    validatePermissions,
 };
