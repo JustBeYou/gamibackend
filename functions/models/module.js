@@ -19,7 +19,11 @@ ModuleVideo.init(moduleVideoModel,
     },
 );
 
-const moduleListModel = {};
+const moduleListModel = {
+    icon: DataTypes.STRING,
+    info: DataTypes.TEXT,
+    links: DataTypes.TEXT,
+};
 class ModuleList extends Model {}
 ModuleList.init(moduleListModel,
     {
@@ -76,10 +80,15 @@ class Module extends Model {
             throw new Error('unkown module type');
         }
 
-        const base = await Module.create(baseModuleProperties);
-        concreteModuleProperties.moduleId = base.id;
-        const concrete = await moduleTypeClass.create(concreteModuleProperties);
-        return {base, concrete};
+        baseModuleProperties[moduleTypeClass.name] = concreteModuleProperties;
+        console.log(baseModuleProperties);
+        const result = await Module.create(
+            baseModuleProperties,
+            {
+                include: moduleTypeClass
+            }
+        );
+        return result;
     }
 
     static async typedCreate(baseModuleProperties, concreteModuleProperties, collectionRef) {
