@@ -4,6 +4,7 @@ const errorHandlers = require('../errorHandlers.js');
 const {Module} = require('../models/module.js');
 const {parseAndValidateCreationData} = require('./queryHelpers.js');
 const {isAllowedToCreateModule} = require('./errorHandlers.js');
+const {dbConnection} = require('../config.js');
 
 const router = express.Router();
 
@@ -18,24 +19,28 @@ router.post(
         const isAdmin = permissions.check(req, 'ADMIN_ITEMS');
 
         errorHandlers.safeResponse(res, async () => {
-            const {
-                baseModuleProperties,
-                concreteModuleProperties,
-                collectionRef,
-            } = await parseAndValidateCreationData(
-                req.body.data,
-                currentToken,
-                isAdmin,
-            );
+            const result = await dbConnection.transaction(async (transaction) => {
+                const {
+                    baseModuleProperties,
+                    concreteModuleProperties,
+                    collectionRef,
+                } = await parseAndValidateCreationData(
+                    req.body.data,
+                    currentToken,
+                    isAdmin,
+                    transaction,
+                );
 
-            isAllowedToCreateModule(req, baseModuleProperties.type);
+                isAllowedToCreateModule(req, baseModuleProperties.type);
 
-            const result = await Module.typedCreate(
-                baseModuleProperties,
-                concreteModuleProperties,
-                collectionRef,
-            );
-
+                const result = await Module.typedCreate(
+                    baseModuleProperties,
+                    concreteModuleProperties,
+                    collectionRef,
+                    transaction,
+                );
+                return result;
+            });
             res.json({status: 'ok', result});
         });
     },

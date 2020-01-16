@@ -33,7 +33,7 @@ function parseCreationData(properties, collectionRef) {
     let baseModuleProperties = {
         type: properties.type,
         index: collectionRef.moduleCount,
-        collectionId: collectionRef.id,
+        CollectionId: collectionRef.id,
         parentToken: collectionRef.parentToken,
     };
     let concreteModuleProperties = {...properties};
@@ -47,12 +47,17 @@ function parseCreationData(properties, collectionRef) {
     };
 }
 
-async function parseAndValidateCreationData(properties, currentToken, isAdmin) {
-    const collectionRef = await Collection.findOne({
+async function parseAndValidateCreationData(properties, currentToken, isAdmin, transaction) {
+    let query =  {
         where: {
-            id: properties.collectionId,
+            id: properties.CollectionId,
         },
-    });
+    };
+    if (transaction !== undefined) {
+        query.transaction = transaction;
+    }
+
+    const collectionRef = await Collection.findOne(query);
     collectionErrorHandlers.validateReference(collectionRef, currentToken, isAdmin);
 
     return parseCreationData(properties, collectionRef);

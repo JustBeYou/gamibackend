@@ -5,10 +5,11 @@ const {Module} = require('../models/module.js');
 const moduleQueryHelpers = require('../module/queryHelpers.js');
 const moduleErrorHandlers = require('../module/errorHandlers.js');
 const errorHandlers = require('../errorHandlers.js');
+const {dbConnection} = require('../config.js');
 
 const router = express.Router();
 
-async function createModules(req, modulesData, collectionRef) {
+async function createModules(req, modulesData, collectionRef, transaction) {
     let result = [];
 
     if (modulesData === null) {
@@ -26,7 +27,9 @@ async function createModules(req, modulesData, collectionRef) {
         const createdModule = await Module.typedCreate(
             baseModuleProperties,
             concreteModuleProperties,
-            collectionRef);
+            collectionRef,
+            transaction,
+        );
 
         result.push(createdModule);
     }
@@ -50,17 +53,27 @@ router.post(
 
         errorHandlers.safeResponse(res, async () => {
             collectionData.parentToken = permissions.getReqToken(req);
-            const collectionRef = await Collection.create(collectionData);
-            const createdModules = await createModules(
-                req,
-                modulesData,
-                collectionRef,
-            );
 
-            let result = {
-                collection: collectionRef,
-                modules: createdModules,
-            };
+            const result = await dbConnection.transaction(async (transaction) => {            
+                const collectionRef = await Collection.create(
+                    collectionData,
+                    {
+                        transaction: transaction,
+                    });
+                const createdModules = await createModules(
+                    req,
+                    modulesData,
+                    collectionRef,
+                    transaction,
+                );
+
+                let result = {
+                    collection: collectionRef,
+                    modules: createdModules,
+                };
+
+                return result;
+            });
             res.json({status: 'ok', result});
         });
     },

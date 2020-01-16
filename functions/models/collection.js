@@ -25,7 +25,7 @@ class Collection extends Model {}
 Collection.init(collectionModel,
     {
         sequelize: dbConnection,
-        modelName: 'collection',
+        modelName: 'Collection',
     },
 );
 

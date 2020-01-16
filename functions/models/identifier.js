@@ -101,14 +101,14 @@ class Identifier extends Model {
 Identifier.init(identifierModel,
     {
         sequelize: dbConnection,
-        modelName: 'identifier',
+        modelName: 'Identifier',
     },
 );
 class IdentifierDeleted extends Model {}
 IdentifierDeleted.init(identifierModel,
     {
         sequelize: dbConnection,
-        modelName: 'identifier_deleted',
+        modelName: 'IdentifierDeleted',
     },
 );
 

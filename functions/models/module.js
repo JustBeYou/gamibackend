@@ -6,7 +6,7 @@ class ModuleImage extends Model {}
 ModuleImage.init(moduleImageModel,
     {
         sequelize: dbConnection,
-        modelName: 'module_image',
+        modelName: 'ModuleImage',
     },
 );
 
@@ -15,7 +15,7 @@ class ModuleVideo extends Model {}
 ModuleVideo.init(moduleVideoModel,
     {
         sequelize: dbConnection,
-        modelName: 'module_video',
+        modelName: 'ModuleVideo',
     },
 );
 
@@ -28,16 +28,41 @@ class ModuleList extends Model {}
 ModuleList.init(moduleListModel,
     {
         sequelize: dbConnection,
-        modelName: 'module_list',
+        modelName: 'ModuleList',
     },
 );
 
-const moduleContactModel = {};
+const moduleContactModel = {
+    // You have on field for storing the default contact info
+    // For additional entries, you'll add then into another table (ModelContactEntry)
+    defaultPhone: DataTypes.STRING,
+    defaultPhoneName: DataTypes.STRING,
+
+    defaultAddress: DataTypes.STRING,
+    defaultAddressName: DataTypes.STRING,
+
+    defaultEmail: DataTypes.STRING,
+    defaultEmailName: DataTypes.STRING,
+};
 class ModuleContact extends Model {}
 ModuleContact.init(moduleContactModel,
     {
         sequelize: dbConnection,
-        modelName: 'module_contact',
+        modelName: 'ModuleContact',
+    },
+);
+
+const moduleContactEntryModel = {
+    // PHONE, EMAIL, ADDRESS
+    type: DataTypes.STRING,
+    name: DataTypes.STRING,
+    content: DataTypes.STRING,
+};
+class ModuleContactEntry extends Model {}
+ModuleContactEntry.init(moduleContactEntryModel,
+    {
+        sequelize: dbConnection,
+        modelName: 'ModuleContactEntry',
     },
 );
 
@@ -48,7 +73,7 @@ class ModuleText extends Model {}
 ModuleText.init(moduleTextModel,
     {
         sequelize: dbConnection,
-        moduleName: 'module_text',
+        moduleName: 'ModuleText',
     },
 );
 
@@ -59,6 +84,17 @@ const classOfModuleType = {
     CONTACT: ModuleContact,
     TEXT: ModuleText,
 };
+
+const subAssociationsOfModuleType = {
+    IMAGE: ModuleImage,
+    VIDEO: ModuleVideo,
+    LIST: ModuleList,
+    CONTACT: {
+        model: ModuleContact,
+        include: ModuleContactEntry,
+    },
+    TEXT: ModuleText,
+}
 
 const moduleModel = {
     index: {
@@ -81,32 +117,28 @@ class Module extends Model {
         }
 
         baseModuleProperties[moduleTypeClass.name] = concreteModuleProperties;
-        const result = await Module.create(
-            baseModuleProperties,
-            {
-                include: moduleTypeClass,
-                transaction: transaction,
-            }
-        );
-        return result;
+        const options = {
+            include: subAssociationsOfModuleType[baseModuleProperties.type],
+            transaction: transaction,
+        };
+
+        return await Module.create(baseModuleProperties, options);
     }
 
-    static async typedCreate(baseModuleProperties, concreteModuleProperties, collectionRef) {
-        return await dbConnection.transaction(async (transaction) => {
-            const result = await Module.concreteCreate(baseModuleProperties, concreteModuleProperties, transaction);
-            await collectionRef.update({
+    static async typedCreate(baseModuleProperties, concreteModuleProperties, collectionRef, transaction) {
+        const result = await Module.concreteCreate(baseModuleProperties, concreteModuleProperties, transaction);
+        await collectionRef.update({
                 moduleCount: collectionRef.moduleCount + 1,
-            }, {
-                transaction: transaction,
-            });
-            return result;
+        }, {
+            transaction: transaction,
         });
+        return result;
     }
 }
 Module.init(moduleModel,
     {
         sequelize: dbConnection,
-        modelName: 'module',
+        modelName: 'Module',
     },
 );
 
@@ -116,11 +148,15 @@ Module.hasOne(ModuleList);
 Module.hasOne(ModuleContact);
 Module.hasOne(ModuleText);
 
+ModuleContact.hasMany(ModuleContactEntry);
+
 module.exports = {
     Module,
     ModuleImage,
     ModuleVideo,
     ModuleList,
     ModuleContact,
+    ModuleContactEntry,
     classOfModuleType,
+    subAssociationsOfModuleType,
 };
