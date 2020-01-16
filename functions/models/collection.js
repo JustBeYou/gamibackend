@@ -15,6 +15,8 @@ const collectionModel = {
     protectionType: DataTypes.STRING,
     password: DataTypes.STRING,
 
+    accessConfiguration: DataTypes.TEXT,
+
     moduleCount: {
         type: DataTypes.INTEGER,
         defaultValue: 0,

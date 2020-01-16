@@ -4,24 +4,45 @@ const errorHandlers = require('../errorHandlers.js');
 const express = require('express');
 const {Collection} = require('../models/collection.js');
 const collectionErrorHandlers = require('../collection/errorHandlers.js');
+const {dbConnection} = require('../config.js');
 
 const router = express.Router();
 
 async function parse(properties, token, isAdmin) {
-    const collectionRef = await Collection.findOne({
-        where: {
-            id: properties.parentCollection,
-        },
+    return await dbConnection.transaction(async (transaction) => {
+        const codesCount = properties.count;
+        delete properties.count;
+
+        const collectionRef = await Collection.findOne({
+            where: {
+                id: properties.parentCollection,
+            },
+            transaction: transaction,
+        });
+
+        collectionErrorHandlers.validateReference(collectionRef, token, isAdmin);
+
+        // if there are no properties specified, use the default configuration
+        if (properties.type === undefined || properties.type === null) {
+            properties = JSON.parse(collectionRef.accessConfiguration);
+        } else {
+            // or change the default one
+            await collectionRef.update({
+                accessConfiguration: JSON.stringify(properties),
+            }, {
+                transaction: transaction,
+            });
+        }
+        properties.parentCollection = collectionRef.id;
+
+        await accessCodes.deleteAllAccessCodes(collectionRef.id);
+        let result = [];
+        for (let i = 0; i < codesCount; i++) {
+            result.push(await accessCodes.createAccessCode(properties));
+        }
+
+        return result;
     });
-
-    collectionErrorHandlers.validateReference(collectionRef, token, isAdmin);
-
-    // if there are no properties specified, use the default configuration
-    if (properties.type === undefined || properties.type === null) {
-        properties = JSON.parse(collectionRef.accessConfiguration);
-    }
-    properties.parentCollection = collectionRef.id;
-    return accessCodes.createAccessCode(properties);
 }
 
 async function parseArray(properties, token, isAdmin) {
