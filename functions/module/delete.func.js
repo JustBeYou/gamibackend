@@ -10,7 +10,7 @@ const router = express.Router();
 router.post(
     '/',
     [
-        permissions.necessary(['ADMIN_ITEMS']),
+        permissions.necessary(['ITEMS']),
         errorHandlers.requestEmptyData,
     ],
     (req, res) => {
