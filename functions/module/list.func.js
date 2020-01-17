@@ -6,6 +6,8 @@ const {Module, classOfModuleType} = require('../models/module.js');
 
 const router = express.Router();
 
+// TODO: ModuleList is the only endpoint that modifies the output of parseQuery(), this should be fixed 
+// in order to be consitent
 async function findAll(query) {
     /*
     TODO: module query should be optimized
@@ -21,6 +23,8 @@ async function findAll(query) {
     };*/
 
     let finalQuery = {
+        limit: query.limit,
+        offset: query.offset,
         where: query.baseQuery.where,
     };
     if (query.baseQuery.where.type !== undefined) {

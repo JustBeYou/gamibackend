@@ -15,6 +15,7 @@ const permissionValidators = {
         return true;
     },
 
+    // TODO: currCalls is never incremented, should fix
     LIMITED_CALLS: permissionProps => {
         return permissionProps.currCalls < permissionProps.maxCalls;
     },

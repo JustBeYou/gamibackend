@@ -22,10 +22,18 @@ function parseQuery(query, currentToken, allowCustomToken) {
         }
     }
 
+    const limit = preparedQuery.limit;
+    const offset = preparedQuery.offset;
+    delete preparedQuery.limit;
+    delete preparedQuery.offset;
+
     const finalQuery = {
+        limit,
+        offset,
         baseQuery,
         concreteQuery: preparedQuery,
     };
+
     return finalQuery;
 }
 
