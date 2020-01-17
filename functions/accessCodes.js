@@ -34,6 +34,10 @@ async function getAccessCode(code) {
     return codeRef.data();
 }
 
+async function modifyAccessCode(code, properties) {
+    firestore.collection('accessCodes').doc(code).update(properties);
+}
+
 // access codes and tokens have the same proprieties
 async function validateAccessCode(code) {
     const codeObj = await getAccessCode(code);
@@ -101,4 +105,5 @@ module.exports = {
     deleteAllAccessCodes,
     canAcccessCollection,
     verifyAccessCode,
+    modifyAccessCode,
 };
