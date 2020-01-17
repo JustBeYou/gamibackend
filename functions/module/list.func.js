@@ -8,7 +8,7 @@ const router = express.Router();
 
 // TODO: ModuleList is the only endpoint that modifies the output of parseQuery(), this should be fixed
 // in order to be consitent
-async function findAll(query) {
+function findAll(query) {
     /*
     TODO: module query should be optimized
     This would be the shortest (and most flexibile) way of implementing the query,
@@ -33,7 +33,7 @@ async function findAll(query) {
             where: query.concreteQuery.where,
         };
     }
-    return await Module.findAll(finalQuery);
+    return Module.findAll(finalQuery);
 }
 
 router.post(

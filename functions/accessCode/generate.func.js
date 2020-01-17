@@ -8,14 +8,17 @@ const {dbConnection} = require('../config.js');
 
 const router = express.Router();
 
-async function parse(properties, token, isAdmin) {
-    return await dbConnection.transaction(async (transaction) => {
+function parse(properties, token, isAdmin) {
+    return dbConnection.transaction(async (transaction) => {
         const codesCount = properties.count;
-        delete properties.count;
+        const parentCollection = properties.parentCollection;
+
+        let newProperties = properties;
+        delete newProperties.count;
 
         const collectionRef = await Collection.findOne({
             where: {
-                id: properties.parentCollection,
+                id: parentCollection,
             },
             transaction,
         });
@@ -24,22 +27,22 @@ async function parse(properties, token, isAdmin) {
 
         // if there are no properties specified, use the default configuration
         if (properties.type === undefined || properties.type === null) {
-            properties = JSON.parse(collectionRef.accessConfiguration);
+            newProperties = JSON.parse(collectionRef.accessConfiguration);
         }
         else {
             // or change the default one
             await collectionRef.update({
-                accessConfiguration: JSON.stringify(properties),
+                accessConfiguration: JSON.stringify(newProperties),
             }, {
                 transaction,
             });
         }
-        properties.parentCollection = collectionRef.id;
+        newProperties.parentCollection = collectionRef.id;
 
         await accessCodes.deleteAllAccessCodes(collectionRef.id);
         let result = [];
         for (let i = 0; i < codesCount; i++) {
-            result.push(await accessCodes.createAccessCode(properties));
+            result.push(await accessCodes.createAccessCode(newProperties));
         }
 
         return result;

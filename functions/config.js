@@ -8,6 +8,7 @@ config.credential = admin.credential.cert(serviceAccount);
 
 admin.initializeApp(config);
 
+// TODO: use Google MySQL in production mode
 /*const dbConnection = new Sequelize('gami', 'gami', 'qwerty123456', {
     host: '35.233.1.255',
     port: 3306,

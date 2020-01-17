@@ -34,7 +34,7 @@ async function getAccessCode(code) {
     return codeRef.data();
 }
 
-async function modifyAccessCode(code, properties) {
+function modifyAccessCode(code, properties) {
     firestore.collection('accessCodes').doc(code).update(properties);
 }
 

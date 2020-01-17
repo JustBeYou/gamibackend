@@ -38,11 +38,12 @@ router.post(
                         isAdmin,
                     );
                 }
-            } else {
+            }
+            else {
                 await updateAccessCode(
-                    req.body.data.code, 
-                    req.body.data.update, 
-                    currentToken, isAdmin
+                    req.body.data.code,
+                    req.body.data.update,
+                    currentToken, isAdmin,
                 );
             }
 

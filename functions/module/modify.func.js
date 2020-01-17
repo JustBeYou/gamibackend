@@ -13,7 +13,7 @@ async function updateModule(id, properties, token, isAdmin, transaction) {
         where: {
             id,
         },
-        transaction: transaction,
+        transaction,
     });
 
     moduleErrorHandlers.validateReference(moduleRef, token, isAdmin);
@@ -24,13 +24,13 @@ async function updateModule(id, properties, token, isAdmin, transaction) {
         where: {
             moduleId: moduleRef.id,
         },
-        transaction: transaction,
+        transaction,
     });
 
-    const concrete = await concreteModuleRef.update(properties, {transaction: transaction});
+    const concrete = await concreteModuleRef.update(properties, {transaction});
     const base = await moduleRef.update({
         updatedByToken: token,
-    }, {transaction: transaction});
+    }, {transaction});
 
 
     return {base, concrete};
@@ -47,8 +47,8 @@ router.post(
         const currentToken = permissions.getReqToken(req);
 
         errorHandlers.safeResponse(res, async () => {
-            const result = await dbConnection.transaction(async (transaction) => {
-                return await updateModule(
+            const result = await dbConnection.transaction((transaction) => {
+                return updateModule(
                     req.body.data.id,
                     req.body.data.update,
                     currentToken,

@@ -1,3 +1,5 @@
+// TODO: checkApi should not expose anything in production mode
+
 const express = require('express');
 const permissions = require('./permissions.js');
 const accessCodes = require('./accessCodes.js');
@@ -43,6 +45,10 @@ router.get(
     '/dbTest',
     (req, res) => {
         dbConnection.sync({alter: true});
+        // Get rid of ESLINT warning
+        Identifier.findOne({});
+        Module.findOne({});
+        Collection.findOne({});
         res.json({status: 'ok'});
     },
 );

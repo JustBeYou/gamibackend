@@ -8,20 +8,22 @@ const collectionErrorHandlers = require('../collection/errorHandlers.js');
 const router = express.Router();
 
 async function parse(properties, token, isAdmin) {
+    const collectionId = properties.parentCollection;
     const collectionRef = await Collection.findOne({
         where: {
-            id: properties.parentCollection,
+            id: collectionId,
         },
     });
 
     collectionErrorHandlers.validateReference(collectionRef, token, isAdmin);
 
     // if there are no properties specified, use the default configuration
+    let newProperties = properties;
     if (properties.type === undefined || properties.type === null) {
-        properties = JSON.parse(collectionRef.accessConfiguration);
+        newProperties = JSON.parse(collectionRef.accessConfiguration);
     }
-    properties.parentCollection = collectionRef.id;
-    return accessCodes.createAccessCode(properties);
+    newProperties.parentCollection = collectionId;
+    return accessCodes.createAccessCode(newProperties);
 }
 
 async function parseArray(properties, token, isAdmin) {

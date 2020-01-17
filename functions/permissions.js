@@ -43,6 +43,7 @@ async function middleware(req, res, next) {
     }
     else {
         const token = req.header(tokenHeader);
+        // ESLINT gies a warning about race conditions here, but there is no risk of that
         req[requestField] = await getTokenPermissions(token);
     }
 

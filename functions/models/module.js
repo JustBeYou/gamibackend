@@ -117,7 +117,7 @@ const moduleModel = {
     },
 };
 class Module extends Model {
-    static async concreteCreate(baseModuleProperties, concreteModuleProperties, transaction) {
+    static concreteCreate(baseModuleProperties, concreteModuleProperties, transaction) {
         const moduleTypeClass = classOfModuleType[baseModuleProperties.type];
 
         if (moduleTypeClass === undefined) {
@@ -130,7 +130,7 @@ class Module extends Model {
             transaction,
         };
 
-        return await Module.create(baseModuleProperties, options);
+        return Module.create(baseModuleProperties, options);
     }
 
     static async typedCreate(baseModuleProperties, concreteModuleProperties, collectionRef, transaction) {

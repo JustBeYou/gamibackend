@@ -138,6 +138,7 @@
             "never"
         ],
         "keyword-spacing": "error",
-        "eqeqeq": "error"
+        "eqeqeq": "error",
+        "require-atomic-updates": "warn"
     }
 }
