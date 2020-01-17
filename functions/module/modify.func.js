@@ -9,7 +9,7 @@ const router = express.Router();
 async function updateModule(id, properties, token, isAdmin) {
     const moduleRef = await Module.findOne({
         where: {
-            id: id,
+            id,
         },
     });
 
@@ -20,7 +20,7 @@ async function updateModule(id, properties, token, isAdmin) {
     const concreteModuleRef = await moduleClass.findOne({
         where: {
             moduleId: moduleRef.id,
-        }
+        },
     });
 
     const concrete = await concreteModuleRef.update(properties);

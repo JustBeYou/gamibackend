@@ -74,12 +74,12 @@ function canAcccessCollection(codeObj, collection) {
 }
 
 async function verifyAccessCode(reference, accessCode, token) {
-    const codeObj = await accessCodes.getAccessCode(accessCode);
-    if (accessCodes.canAcccessCollection(codeObj, reference) === false) {
+    const codeObj = await getAccessCode(accessCode);
+    if (canAcccessCollection(codeObj, reference) === false) {
         throw new Error('access code is not related to the collection');
     }
 
-    const associated = await accessCodes.associate(accessCode, token);
+    const associated = await associate(accessCode, token);
     if (associated === false) {
         throw new Error('associated tokens max limit exceeded');
     }

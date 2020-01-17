@@ -33,7 +33,7 @@ function parseQuery(query, currentToken, allowCustomToken) {
         };
     }
 
-    if (query.parentToken === null && !allowCustomToken) {
+    if (query.parentToken === undefined && !allowCustomToken) {
         query.parentToken = currentToken;
     }
     else if (query.parentToken !== currentToken && !allowCustomToken) {

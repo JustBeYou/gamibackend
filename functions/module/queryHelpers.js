@@ -13,10 +13,10 @@ function parseQuery(query, currentToken, allowCustomToken) {
         'createdAt',
         'updatedAt',
     ];
-    const baseQuery = {where: {}};    
-    for (attr of baseAttributes) {
+    const baseQuery = {where: {}};
+    for (const attr of baseAttributes) {
         // TODO: = could be dangerous for Objects, find a better way to copy
-        if (preparedQuery.where[attr] != undefined) {
+        if (preparedQuery.where[attr] !== undefined) {
             baseQuery.where[attr] = preparedQuery.where[attr];
             delete preparedQuery.where[attr];
         }
@@ -56,7 +56,7 @@ function parseCreationData(properties, collectionRef) {
 }
 
 async function parseAndValidateCreationData(properties, currentToken, isAdmin, transaction) {
-    let query =  {
+    let query = {
         where: {
             id: properties.CollectionId,
         },

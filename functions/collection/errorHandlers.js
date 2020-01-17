@@ -10,10 +10,11 @@ async function validatePermissions(reference, accessCode, token, isAdmin) {
     if (reference.accessStatus === 'PUBLIC') {
         return ;
     }
-    
+
     if (reference.protectionType === 'ACCESS_CODE') {
         await accessCodes.verifyAccessCode(reference, accessCode, token);
-    } else if (reference.protectionType === 'PASSWORD') {
+    }
+    else if (reference.protectionType === 'PASSWORD') {
         if (passwordHash.validatePassword(accessCode, reference.password) === false) {
             throw new Error('invalid password');
         }

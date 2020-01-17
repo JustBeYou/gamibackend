@@ -17,7 +17,7 @@ async function parse(properties, token, isAdmin) {
             where: {
                 id: properties.parentCollection,
             },
-            transaction: transaction,
+            transaction,
         });
 
         collectionErrorHandlers.validateReference(collectionRef, token, isAdmin);
@@ -25,12 +25,13 @@ async function parse(properties, token, isAdmin) {
         // if there are no properties specified, use the default configuration
         if (properties.type === undefined || properties.type === null) {
             properties = JSON.parse(collectionRef.accessConfiguration);
-        } else {
+        }
+        else {
             // or change the default one
             await collectionRef.update({
                 accessConfiguration: JSON.stringify(properties),
             }, {
-                transaction: transaction,
+                transaction,
             });
         }
         properties.parentCollection = collectionRef.id;

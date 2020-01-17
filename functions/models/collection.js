@@ -22,6 +22,13 @@ const collectionModel = {
         defaultValue: 0,
         allowNull: false,
     },
+
+    deletedAt: DataTypes.DATE,
+    deletedByToken: DataTypes.UUID,
+    inactive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
 };
 class Collection extends Model {}
 Collection.init(collectionModel,

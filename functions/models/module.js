@@ -94,7 +94,7 @@ const subAssociationsOfModuleType = {
         include: ModuleContactEntry,
     },
     TEXT: ModuleText,
-}
+};
 
 const moduleModel = {
     index: {
@@ -106,7 +106,15 @@ const moduleModel = {
     // IMAGE, VIDEO, LIST, CONTACT
     type: DataTypes.STRING,
     parentToken: DataTypes.UUID,
+
     updatedByToken: DataTypes.UUID,
+    deletedByToken: DataTypes.UUID,
+
+    deletedAt: DataTypes.DATE,
+    inactive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
 };
 class Module extends Model {
     static async concreteCreate(baseModuleProperties, concreteModuleProperties, transaction) {
@@ -119,7 +127,7 @@ class Module extends Model {
         baseModuleProperties[moduleTypeClass.name] = concreteModuleProperties;
         const options = {
             include: subAssociationsOfModuleType[baseModuleProperties.type],
-            transaction: transaction,
+            transaction,
         };
 
         return await Module.create(baseModuleProperties, options);
@@ -128,9 +136,9 @@ class Module extends Model {
     static async typedCreate(baseModuleProperties, concreteModuleProperties, collectionRef, transaction) {
         const result = await Module.concreteCreate(baseModuleProperties, concreteModuleProperties, transaction);
         await collectionRef.update({
-                moduleCount: collectionRef.moduleCount + 1,
+            moduleCount: collectionRef.moduleCount + 1,
         }, {
-            transaction: transaction,
+            transaction,
         });
         return result;
     }

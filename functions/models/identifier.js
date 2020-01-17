@@ -3,10 +3,14 @@ const {dbConnection} = require('../config.js');
 
 // createdAt, updatedAt, deletedAt are created by default
 
+// TODO: unique attribute is not working, must fix this
 const identifierModel = {
     key: {
         type: DataTypes.TEXT,
-        unique: true,
+        unique: {
+            args: true,
+            msg: 'key already exists',
+        },
         allowNull: false,
         validate: {
             is: /https:\/\/gamiworld.com\/share\/([a-zA-Z0-9\-_]{5,})/gi,
@@ -15,12 +19,12 @@ const identifierModel = {
     parentToken: DataTypes.UUID,
     // RANDOMIZER, CYCLIC, SINGLE, CHRONO, RESERVED
     behavior: DataTypes.STRING,
-    inactive: DataTypes.BOOLEAN,
 
     logic: DataTypes.STRING,
 
     updatedByToken: DataTypes.UUID,
     deletedByToken: DataTypes.UUID,
+    deletedAt: DataTypes.DATE,
 };
 
 // TODO: decide where to store object logic (MySQL column now, Firestore in the future maybe)
@@ -93,8 +97,19 @@ class Identifier extends Model {
         return Identifier.create(properties, {validate});
     }
 
-    static moveToTrash(reference, token) {
-        // TODO: not sure how to implement deletion procedure
+    static async moveToTrash(reference, token, transaction) {
+        let identifierBackup = {};
+        for (const key in identifierModel) {
+            identifierBackup[key] = reference[key];
+        }
+        identifierBackup.deletedByToken = token;
+        identifierBackup.deletedAt = Date.now();
+
+        await IdentifierDeleted.create(identifierBackup, {
+            transaction,
+        });
+
+        await reference.destroy({transaction, force: true});
     }
 }
 
@@ -104,8 +119,13 @@ Identifier.init(identifierModel,
         modelName: 'Identifier',
     },
 );
+
+let identifierDeletedModel = {...identifierModel};
+// the key is not unique anymore
+identifierDeletedModel.key = DataTypes.STRING;
+
 class IdentifierDeleted extends Model {}
-IdentifierDeleted.init(identifierModel,
+IdentifierDeleted.init(identifierDeletedModel,
     {
         sequelize: dbConnection,
         modelName: 'IdentifierDeleted',
@@ -115,4 +135,5 @@ IdentifierDeleted.init(identifierModel,
 module.exports = {
     Identifier,
     IdentifierDeleted,
+    identifierModel,
 };

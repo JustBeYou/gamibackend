@@ -63,7 +63,7 @@ router.post(
                 const collectionRef = await Collection.create(
                     collectionData,
                     {
-                        transaction: transaction,
+                        transaction,
                     });
                 const createdModules = await createModules(
                     req,
