@@ -6,7 +6,6 @@ const errorHandlers = require('../errorHandlers.js');
 
 const router = express.Router();
 
-// TODO: implement pagination
 router.post(
     '/',
     [

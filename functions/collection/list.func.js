@@ -9,7 +9,7 @@ const router = express.Router();
 router.post(
     '/',
     [
-        permissions.necessary([]),
+        permissions.necessary(['ITEMS']),
         errorHandlers.requestEmptyQuery,
     ],
     (req, res) => {

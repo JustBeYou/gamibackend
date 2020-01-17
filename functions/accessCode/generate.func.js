@@ -8,6 +8,7 @@ const {dbConnection} = require('../config.js');
 
 const router = express.Router();
 
+// TODO: make this shorter!
 function parse(properties, token, isAdmin) {
     return dbConnection.transaction(async (transaction) => {
         const codesCount = properties.count;

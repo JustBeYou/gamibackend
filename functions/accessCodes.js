@@ -1,6 +1,7 @@
 const firestore = require('./config.js').firestore;
 const permissions = require('./permissions.js');
 
+// TODO: access codes functions are a little bit inconsistent
 async function createAccessCode(properties) {
     const newCode = await firestore.collection('accessCodes').add(properties);
     return newCode.id;

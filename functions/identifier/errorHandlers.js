@@ -1,4 +1,3 @@
-
 const {Identifier} = require('../models/identifier.js');
 
 function validateReference(reference, token, isAdmin) {

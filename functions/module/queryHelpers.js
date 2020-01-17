@@ -2,6 +2,7 @@ const {Collection} = require('../models/collection.js');
 const collectionErrorHandlers = require('../collection/errorHandlers.js');
 const queryHelpers = require('../models/queryHelpers.js');
 
+// TODO: make this shorter
 function parseQuery(query, currentToken, allowCustomToken) {
     let preparedQuery = queryHelpers.parseQuery(query, currentToken, allowCustomToken);
 

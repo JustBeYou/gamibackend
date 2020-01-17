@@ -16,6 +16,7 @@ function timestampFilter(alterationType, startTime, endTime) {
     return filter;
 }
 
+// TODO: make this shorter
 function parseQuery(query, currentToken, allowCustomToken) {
     let finalQuery = {...query};
 
