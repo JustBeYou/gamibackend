@@ -34,7 +34,7 @@ function parseQuery(query, currentToken, allowCustomToken) {
     }
 
     if (query.parentToken === undefined && !allowCustomToken) {
-        query.parentToken = currentToken;
+        finalQuery.parentToken = currentToken;
     }
     else if (query.parentToken !== currentToken && !allowCustomToken) {
         throw new Error('not enough permissions');
