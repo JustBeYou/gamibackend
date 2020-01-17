@@ -3,14 +3,17 @@ const permissions = require('../permissions.js');
 const errorHandlers = require('../errorHandlers.js');
 const {Module, classOfModuleType} = require('../models/module.js');
 const moduleErrorHandlers = require('./errorHandlers.js');
+const {dbConnection} = require('../config.js');
 
 const router = express.Router();
 
-async function updateModule(id, properties, token, isAdmin) {
+// TODO: we can't modify tables that inherit concrete types
+async function updateModule(id, properties, token, isAdmin, transaction) {
     const moduleRef = await Module.findOne({
         where: {
             id,
         },
+        transaction: transaction,
     });
 
     moduleErrorHandlers.validateReference(moduleRef, token, isAdmin);
@@ -21,12 +24,13 @@ async function updateModule(id, properties, token, isAdmin) {
         where: {
             moduleId: moduleRef.id,
         },
+        transaction: transaction,
     });
 
-    const concrete = await concreteModuleRef.update(properties);
+    const concrete = await concreteModuleRef.update(properties, {transaction: transaction});
     const base = await moduleRef.update({
         updatedByToken: token,
-    });
+    }, {transaction: transaction});
 
 
     return {base, concrete};
@@ -43,12 +47,15 @@ router.post(
         const currentToken = permissions.getReqToken(req);
 
         errorHandlers.safeResponse(res, async () => {
-            const result = await updateModule(
-                req.body.data.id,
-                req.body.data.update,
-                currentToken,
-                isAdmin,
-            );
+            const result = await dbConnection.transaction(async (transaction) => {
+                return await updateModule(
+                    req.body.data.id,
+                    req.body.data.update,
+                    currentToken,
+                    isAdmin,
+                    transaction,
+                );
+            });
             res.json({status: 'ok', result});
         });
     },
