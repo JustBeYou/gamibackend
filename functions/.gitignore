@@ -1,2 +1,4 @@
 node_modules/
 *.db
+lib/
+.nyc_output/

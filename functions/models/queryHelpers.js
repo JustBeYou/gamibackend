@@ -1,6 +1,7 @@
 const {Op} = require('sequelize');
 
-// TODO: items per page limit may be changed
+// TODO: port this to TS later
+
 const itemsPerPageLimit = 100;
 
 // alterationType - createdAt, updatedAt
