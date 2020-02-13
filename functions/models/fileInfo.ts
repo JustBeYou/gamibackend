@@ -1,6 +1,5 @@
-import {Model, DataTypes, Association} from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import { RelationalDatabase } from '../database';
-import {Module} from './module';
 
 const fileInfoModel = {
     bucket: DataTypes.STRING,
@@ -47,10 +46,6 @@ export class FileInfoSchema extends Model {
     public isSignedURLValid!: string;
 
     public deleted!: string;
-
-    public static associations: {
-        Modules: Association<FileInfoSchema, Module>,
-    };
 }
 export class FileInfo extends FileInfoSchema {}
 
@@ -74,7 +69,4 @@ export function initializeFileInfoTables(database: RelationalDatabase) {
             modelName: 'FileInfoToModule',
         }
     );
-
-    FileInfo.belongsToMany(Module, {through: FileInfoToModule, foreignKey: 'ModuleId'});
-    Module.belongsToMany(FileInfo, {through: FileInfoToModule, foreignKey: 'FileInfoId'});
 }

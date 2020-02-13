@@ -1,6 +1,12 @@
 import {Model, DataTypes, Association, Transaction} from 'sequelize';
 import {RelationalDatabase} from '../database';
 import { Collection } from './collection';
+import { FileInfo, FileInfoToModule } from './fileInfo';
+import { HasManyGetAssociationsMixin, 
+    HasManyAddAssociationMixin, 
+    HasManyHasAssociationMixin, 
+    HasManyCountAssociationsMixin, 
+    HasManyCreateAssociationMixin } from 'sequelize';
 
 const moduleImageModel = {};
 export class ModuleImageSchema extends Model {
@@ -99,7 +105,16 @@ export class ModuleSchema extends Model {
         ModuleList: Association<ModuleSchema, ModuleList>,
         ModuleContact: Association<ModuleSchema, ModuleContact>,
         ModuleText: Association<ModuleSchema, ModuleText>,
+        FileInfos: Association<ModuleSchema, FileInfo>,
     };
+
+    public readonly fileInfos?: FileInfo[];
+
+    public getFileInfos!: HasManyGetAssociationsMixin<FileInfo>;
+    public addFileInfo!: HasManyAddAssociationMixin<FileInfo, number>;
+    public hasFileInfo!: HasManyHasAssociationMixin<FileInfo, number>;
+    public countFileInfos!: HasManyCountAssociationsMixin;
+    public createFileInfo!: HasManyCreateAssociationMixin<FileInfo>;
 };
 
 export class Module extends ModuleSchema {
@@ -202,4 +217,7 @@ export function initializeModuleTables(database: RelationalDatabase) {
 
     Module.hasOne(ModuleText);
     ModuleText.belongsTo(Module);
+
+    FileInfo.belongsToMany(Module, {through: FileInfoToModule});
+    Module.belongsToMany(FileInfo, {through: FileInfoToModule});
 }
