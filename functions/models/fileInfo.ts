@@ -1,5 +1,6 @@
-import {Model, DataTypes} from 'sequelize';
-import { getMainDatabase, RelationalDatabase } from '../database';
+import {Model, DataTypes, Association} from 'sequelize';
+import { RelationalDatabase } from '../database';
+import {Module} from './module';
 
 const fileInfoModel = {
     bucket: DataTypes.STRING,
@@ -25,16 +26,55 @@ const fileInfoModel = {
 
     deleted: DataTypes.BOOLEAN,
 };
+export class FileInfoSchema extends Model {
+    public bucket!: string;
+    public path!: string;
+    public filename!: string;
+    public originalFilename!: string;
+    public extension!: string;
 
-export class FileInfoSchema extends Model {}
+    public sizeInBytes!: number;
+    public resolutionInPixels!: number;
+    public timeDuration!: number;
+    public FPS!: number;
+    public processingRanking!: number;
+    public estimatedProcessingTimeInMinutes!: number;
+    public status!: string;
 
+    public parentToken!: string;
+    
+    public signedURL!: string;
+    public isSignedURLValid!: string;
+
+    public deleted!: string;
+
+    public static associations: {
+        Modules: Association<FileInfoSchema, Module>,
+    };
+}
 export class FileInfo extends FileInfoSchema {}
 
-export function initializeFileInfoTable(database: RelationalDatabase) {
+export class FileInfoToModuleSchema extends Model {
+    public ModuleId!: number;
+    public FileInfoId!: number;
+}
+export class FileInfoToModule extends FileInfoToModuleSchema {}
+
+export function initializeFileInfoTables(database: RelationalDatabase) {
     FileInfo.init(fileInfoModel,
         {
-            sequelize: getMainDatabase().getConnectionObject(),
+            sequelize: database.getConnectionObject(),
             modelName: 'FileInfo',
         },
     );
+
+    FileInfoToModule.init({},
+        {
+            sequelize: database.getConnectionObject(),
+            modelName: 'FileInfoToModule',
+        }
+    );
+
+    FileInfo.belongsToMany(Module, {through: FileInfoToModule, foreignKey: 'ModuleId'});
+    Module.belongsToMany(FileInfo, {through: FileInfoToModule, foreignKey: 'FileInfoId'});
 }

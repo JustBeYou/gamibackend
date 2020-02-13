@@ -44,7 +44,8 @@ export class GoogleMySQLDatabase implements RelationalDatabase {
         return GoogleMySQLDatabase.dbConnection.transaction(callback);
     }
 }
-let defaultMainDatabase = new SQLiteDatabase();
+
+let defaultMainDatabase: RelationalDatabase = new SQLiteDatabase();
 
 export function setMainDatabase(newDatabase: RelationalDatabase) {
     defaultMainDatabase = newDatabase;

@@ -3,6 +3,7 @@ const {Sequelize} = require('sequelize');
 const {initializeIdentifierTables} = require('../models/identifier');
 const {initializeCollectionTables} = require('../models/collection');
 const {initializeModuleTables} = require('../models/module');
+const {initializeFileInfoToModule} = require('../models/fileInfo');
 
 class TestingDatabase {
     constructor() {
@@ -29,7 +30,8 @@ before(async () => {
     initializeIdentifierTables(mockDatabase);
     initializeModuleTables(mockDatabase);
     initializeCollectionTables(mockDatabase);
-    await mockDatabase.dbConnection.sync({alter: true});
+    initializeFileInfoToModule(mockDatabase);
+    await mockDatabase.getConnectionObject().sync({alter: true});
 
     console.log('End-to-end tests only');
 });
