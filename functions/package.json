@@ -2,7 +2,7 @@
   "name": "functions",
   "description": "Cloud Functions for Firebase",
   "scripts": {
-    "build": "./node_modules/.bin/tsc && cp serviceAccountKey.json lib/",
+    "build": "./node_modules/.bin/tsc && rm -rf lib/tests && cp -r tests/ lib/tests && cp serviceAccountKey.json lib/",
     "lint": "tslint .",
     "serve": "firebase serve --only functions",
     "shell": "firebase functions:shell",

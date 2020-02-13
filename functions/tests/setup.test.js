@@ -5,16 +5,18 @@ const {initializeCollectionTables} = require('../models/collection');
 const {initializeModuleTables} = require('../models/module');
 
 class TestingDatabase {
-    static dbConnection = new Sequelize('sqlite::memory:', {
-        logging: false,
-    });
+    constructor() {
+        this.dbConnection = new Sequelize('sqlite::memory:', {
+            logging: false,
+        });
+    }
 
     getConnectionObject() {
-        return TestingDatabase.dbConnection;
+        return this.dbConnection;
     }
 
     executeTransaction(callback) {
-        return TestingDatabase.dbConnection.transaction(callback);
+        return this.dbConnection.transaction(callback);
     }
 }
 
@@ -27,7 +29,7 @@ before(async () => {
     initializeIdentifierTables(mockDatabase);
     initializeModuleTables(mockDatabase);
     initializeCollectionTables(mockDatabase);
-    await TestingDatabase.dbConnection.sync({alter: true});
+    await mockDatabase.dbConnection.sync({alter: true});
 
     console.log('End-to-end tests only');
 });
