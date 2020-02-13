@@ -169,10 +169,3 @@ Object.assign(identifierDeletedModel, {key: DataTypes.STRING});
 
 export class IdentifierDeleted extends IdentifierSchema {}
 
-
-module.exports = {
-    Identifier,
-    IdentifierDeleted,
-    identifierModel,
-    initializeIdentifierTables,
-};
