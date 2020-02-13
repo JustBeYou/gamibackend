@@ -20,9 +20,9 @@ function initializeDatabase() {
     const mainDatabase = getMainDatabase();
 
     initializeIdentifierTables(mainDatabase);
+    initializeFileInfoTables(mainDatabase);
     initializeModuleTables(mainDatabase);
     initializeCollectionTables(mainDatabase);
-    initializeFileInfoTables(mainDatabase);
 }
 
 function addMiddlewares(app: Express) {
