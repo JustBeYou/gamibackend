@@ -1,0 +1,23 @@
+import { ObjectMetadata } from "firebase-functions/lib/providers/storage";
+import {FileInfo} from '../models/fileInfo';
+import { fileCreationCache } from "./creationCache";
+
+const shouldProcess: Array<string | undefined> = ['video', 'image'];
+
+export default async function(fileMetadata: ObjectMetadata) {
+    const originalMetadata = await fileCreationCache.get(fileMetadata.name!);
+
+    const preevaluatedStatus = shouldProcess.includes(fileMetadata.contentType) ? 'NOT_PROCESSED' : 'PROCESSED'; 
+    await FileInfo.create({
+        bucket: fileMetadata.bucket,
+        originalFilename: originalMetadata.originalFilename,
+        filename: fileMetadata.name,
+        sizeInBytes: fileMetadata.size,
+        status: preevaluatedStatus,
+        parentToken: originalMetadata.parentToken,
+        isSignedURLValid: false,
+        deleted: false,
+    });
+
+    await fileCreationCache.unset(fileMetadata.name!);
+}
