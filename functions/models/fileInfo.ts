@@ -3,6 +3,7 @@ import { RelationalDatabase } from '../database';
 
 const fileInfoModel = {
     bucket: DataTypes.STRING,
+    // TODO: add folder support maybe
     path: DataTypes.STRING,
     filename: DataTypes.STRING,
     originalFilename: DataTypes.STRING,
@@ -15,6 +16,7 @@ const fileInfoModel = {
     FPS: DataTypes.NUMBER,
     processingRanking: DataTypes.NUMBER,
     estimatedProcessingTimeInMinutes: DataTypes.NUMBER,
+    // NOT_PROCESSED, IN_QUEUE, PROCESSING, PROCESSED
     status: DataTypes.STRING,
     
     // TODO: 'utilizare' ???    
@@ -24,6 +26,8 @@ const fileInfoModel = {
     isSignedURLValid: DataTypes.BOOLEAN,
 
     deleted: DataTypes.BOOLEAN,
+    deletedByToken: DataTypes.UUID,
+    deletedAt: DataTypes.DATE,
 };
 export class FileInfoSchema extends Model {
     public bucket!: string;
@@ -46,6 +50,11 @@ export class FileInfoSchema extends Model {
     public isSignedURLValid!: string;
 
     public deleted!: string;
+    public deletedByToken!: string;
+    
+    public deletedAt!: Date;
+    public readonly createdAt!: Date;
+    public readonly updatedAt!: Date;
 }
 export class FileInfo extends FileInfoSchema {}
 
