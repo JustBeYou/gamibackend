@@ -79,6 +79,7 @@ export class GoogleCloudStorageWrapper implements Storage {
 }
 
 let defaultStorage: Storage = new GoogleCloudStorageWrapper();
+let defaultBucket: string = 'gamibackend_files';
 
 export function getDefaultStorage() {
     return defaultStorage;
@@ -86,4 +87,12 @@ export function getDefaultStorage() {
 
 export function setDefaultStorage(storage: Storage) {
     defaultStorage = storage;
+}
+
+export function getDefaultBucket() {
+    return defaultBucket;
+}
+
+export function setDefaultBucket(bucketName: string) {
+    defaultBucket = bucketName;
 }
