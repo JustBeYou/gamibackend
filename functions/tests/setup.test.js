@@ -7,6 +7,7 @@ const {initializeFileInfoTables} = require('../models/fileInfo');
 const express = require('express');
 const storage = require('../storage');
 const concat = require('concat-stream');
+const utils = require('./utils');
 
 class TestingDatabase {
     constructor() {
@@ -33,9 +34,9 @@ class TestingStorage {
         const router = express.Router();
         router.post('/resumable', async (req, res) => {
             if (req.header('Content-Type') === req.query.type) {
-                this.storage[req.query.bucket][req.query.file] = '';
+                this.storage[storage.getDefaultBucket()][req.query.file] = '';
                 const signelURL = await this.getSignedURL(
-                    req.query.bucket,
+                    storage.getDefaultBucket(),
                     req.query.file,
                     req.query.type,
                     'write',
@@ -46,16 +47,23 @@ class TestingStorage {
                 res.status(400).json({status: 'wrong type'});
             }
         });
-        router.put('/write', (req, res) => {
+        router.put('/write', async (req, res) => {
             if (req.header('Content-Type') === req.query.type) {
-                this.storage[req.query.bucket][req.query.file] += req.body.toString();
+                this.storage[storage.getDefaultBucket()][req.query.file] += req.body.toString();
+                const func = utils.loadStorageFunction('fileCreate');
+                await func({
+                    name: req.query.file, 
+                    bucket: storage.getDefaultBucket(), 
+                    size: req.body.toString().length,
+                    contentType: req.query.type,
+                });
                 res.json({status: 'ok'});
             } else {
                 res.status(400).json({status: 'wrong type'});
             }
         });        
         router.get('/read', (req, res) => {
-            res.send(this.storage[req.query.bucket][req.query.file]);
+            res.send(this.storage[storage.getDefaultBucket()][req.query.file]);
         });
 
         this.app.use(function(req, res, next){
@@ -104,6 +112,7 @@ before(async () => {
 
     const mockStorage = new TestingStorage();
     storage.setDefaultStorage(mockStorage);
+    storage.setDefaultBucket('gamibackend_testbucket');
 });
 
 after(() => {

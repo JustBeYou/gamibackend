@@ -9,6 +9,7 @@ import {initializeIdentifierTables} from './models/identifier';
 import {initializeCollectionTables} from './models/collection';
 import {initializeModuleTables} from './models/module';
 import {initializeFileInfoTables} from './models/fileInfo';
+import { getDefaultBucket } from './storage';
 
 const loggerOutput = console;
 function logger(req: Request, res: Response, next: Function) {
@@ -38,6 +39,10 @@ function loadFunctions() {
         addMiddlewares(app as Express);
         app.use(loadedFunctions['http'][functionName]);
         exports[functionName] = functions.https.onRequest(app);
+    }
+
+    for (const functionName in loadedFunctions['storage']) {
+        exports[functionName] = functions.storage.bucket(getDefaultBucket()).object().onFinalize(loadedFunctions['storage'][functionName]);
     }
 
     // TODO: remove this, debug only
