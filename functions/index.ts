@@ -1,5 +1,5 @@
 import * as functions from 'firebase-functions';
-import {appRouters} from './app_loader';
+import {loadedFunctions} from './app_loader';
 import * as cors from 'cors';
 import * as permissions from './permissions';
 import {Request, Response, Express} from 'express';
@@ -33,10 +33,10 @@ function addMiddlewares(app: Express) {
 }
 
 function loadFunctions() { 
-    for (const functionName in appRouters) {
+    for (const functionName in loadedFunctions['http']) {
         const app = express();
         addMiddlewares(app as Express);
-        app.use(appRouters[functionName]);
+        app.use(loadedFunctions['http'][functionName]);
         exports[functionName] = functions.https.onRequest(app);
     }
 

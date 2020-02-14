@@ -1,7 +1,7 @@
 const chai = require('chai');
 const permissions = require('../permissions');
 const express = require('express');
-const appRouters = require('../app_loader').appRouters;
+const loadedFunctions = require('../app_loader').loadedFunctions;
 const bodyParser = require('body-parser');
 
 function makeId(length) {
@@ -22,7 +22,7 @@ function loadAppFunction(name) {
     const app = express();
     app.use(bodyParser.json());
     app.use(permissions.middleware);
-    app.use(appRouters[name]);
+    app.use(loadedFunctions['http'][name]);
 
     functionCache[name] = app;
 
