@@ -4,10 +4,10 @@
   "scripts": {
     "build": "./node_modules/.bin/tsc && rm -rf lib/tests && cp -r tests/ lib/tests && cp serviceAccountKey.json lib/",
     "lint": "tslint .",
-    "serve": "firebase serve --only functions",
+    "serve": "firebase serve",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
+    "deploy": "firebase deploy",
     "logs": "firebase functions:log",
     "test": "mocha \"lib/tests/**/*.test.js\" --require mocha-steps",
     "coverage": "nyc mocha \"lib/tests/**/*.test.js\" --require mocha-steps"
@@ -61,7 +61,8 @@
     "steps": "0.0.2",
     "tsc": "^1.20150623.0",
     "tslint": "^6.0.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.7.5",
+    "uuidv4": "^6.0.2"
   },
   "devDependencies": {
     "eslint": "^5.12.0",
