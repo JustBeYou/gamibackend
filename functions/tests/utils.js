@@ -16,7 +16,11 @@ function makeId(length) {
 
 const functionCache = {};
 
-function loadAppFunction(name) {
+function loadStorageFunction(name) {
+    return loadedFunctions['storage'][name];
+}
+
+function loadHttpFunction(name) {
     if (name in functionCache) return functionCache[name];
 
     const app = express();
@@ -30,7 +34,7 @@ function loadAppFunction(name) {
 }
 
 function doFunctionRequest(name, customPath = '/') {
-    const appFunction = loadAppFunction(name);
+    const appFunction = loadHttpFunction(name);
     const requestInProgress = chai.request(appFunction)
         .post(customPath)
         .type('json');
@@ -55,6 +59,7 @@ function setUserToken() {
 module.exports = {
     makeId,
     doFunctionRequest,
+    loadStorageFunction,
     adminToken,
     userToken,
 };
