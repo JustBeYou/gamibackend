@@ -3,16 +3,17 @@ const expect = chai.expect;
 const chaiHttp = require('chai-http');
 const {doFunctionRequest, makeId} = require('../utils');
 const axios = require('axios');
-const {getDefaultStorage} = require('../../storage');
+const {getDefaultBucket, getDefaultStorage} = require('../../storage');
 const {FileInfo} = require('../../models/fileInfo');
 
 chai.use(chaiHttp);
 
-const testBucket = 'gamibackend_testbucket';
-const randomFileName = makeId(10);
+let testBucket = null;
+let randomFileName = null;
 const randomContent = makeId(100);
 describe('File management API', () => {
     before(async () => {
+        testBucket = getDefaultBucket();
         const alreadyExists = await getDefaultStorage().checkBucketExists(testBucket);
         if (!alreadyExists) {
             await getDefaultStorage().createBucket(testBucket);
@@ -24,13 +25,14 @@ describe('File management API', () => {
             .setUserToken()
             .send({
                 data: {
-                    bucket: testBucket,
-                    file: randomFileName,
+                    filename: 'testfile',
                     type: 'text',
                 }
             });
+        expect(result).to.have.status(200);
         
-        const url = result.body.result;
+        const url = result.body.result.url;
+        randomFileName = result.body.result.file;
         const response = await axios.post(url, '', {
             headers: {
                 'Content-Type': 'text',
@@ -54,13 +56,13 @@ describe('File management API', () => {
             .setUserToken()
             .send({
                 data: {
-                    bucket: testBucket,
-                    file: randomFileName,
+                    filename: randomFileName,
                     type: 'text',
                 }
             });
+        expect(result).to.have.status(200);
 
-        const url = result.body.result;
+        const url = result.body.result.url;
         const response = await axios.get(url, {
             headers: {
                 'Content-Type': 'text',
@@ -70,17 +72,47 @@ describe('File management API', () => {
         expect(response.data).to.be.equal(randomContent);
     });
 
-    step('Check file status', async () => {
-        const file = await FileInfo.findOne({
-            where: {
-                originalFilename: randomFileName,
-            },
-        });
+    step('Search with filters', async () => {
+        const result = await doFunctionRequest('fileList')
+            .setUserToken()
+            .send({
+                data: {
+                    query: [
+                        {
+                            filename: randomFileName,
+                        },
+                    ]
+                }   
+            });
 
-        expect(file).to.not.be.null;
-        expect(file).to.not.be.undefined;
-        expect(file.status).to.be.equal('PROCESSED');
+        expect(result).to.have.status(200);
+        expect(result.body.result.length).to.be.equal(1);
+        expect(result.body.result[0][0].filename).to.be.equal(randomFileName);
+        expect(result.body.result[0][0].originalFilename).to.be.equal('testfile');
     });
-    step('Search files with filters');
-    step('Mark file as deleted');
+
+    step('Check file status', async () => {
+        const result = await doFunctionRequest('fileStatus')
+            .setUserToken()
+            .send({
+                data: {
+                    filename: randomFileName,
+                },
+            });
+
+        expect(result).to.have.status(200);
+        expect(result.body.result.status).to.be.equal('PROCESSED');
+    });
+    
+    step('Mark file as deleted', async () => {
+        const result = await doFunctionRequest('fileDelete')
+            .setUserToken()
+            .send({
+                data: {
+                    filename: randomFileName,
+                }
+            });
+
+        expect(result).to.have.status(200);
+    });
 });
