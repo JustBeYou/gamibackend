@@ -3,6 +3,8 @@ import * as GCloudStorage from '@google-cloud/storage';
 export interface Storage {
     createBucket(bucketName: string): Promise<void>;
     getSignedURL(bucketName: string, fileName: string, fileType: string, action: string): Promise<string>;
+    checkFileExists(bucketName: string, fileName: string): Promise<boolean>;
+    checkBucketExists(bucketName: string): Promise<boolean>;
 };
 
 export class GoogleCloudStorageWrapper implements Storage {
@@ -52,6 +54,23 @@ export class GoogleCloudStorageWrapper implements Storage {
         } catch (error) {
             throw new Error('Could not get a signed URL: ' + error.toString());
         }
+    }
+
+    public async checkFileExists(bucketName: string, fileName: string) {
+        const validateBucketName = this.validateBucketName(bucketName);
+        const bucket = GoogleCloudStorageWrapper.storageConnectionObj.bucket(validateBucketName);
+        const file = bucket.file(fileName);
+        const exists = (await file.exists())[0];
+
+        return Promise.resolve(exists);
+    }
+
+    public async checkBucketExists(bucketName: string) {
+        const validateBucketName = this.validateBucketName(bucketName);
+        const bucket = GoogleCloudStorageWrapper.storageConnectionObj.bucket(validateBucketName);
+        const exists = (await bucket.exists())[0];
+
+        return Promise.resolve(exists);
     }
 
     private helper_addMinutes(date: Date, minutes: number) {
