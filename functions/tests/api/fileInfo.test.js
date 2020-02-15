@@ -115,4 +115,7 @@ describe('File management API', () => {
 
         expect(result).to.have.status(200);
     });
+
+    step('Associate');
+    step('Deassociate');
 });
