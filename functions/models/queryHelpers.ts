@@ -1,4 +1,4 @@
-const {Op} = require('sequelize');
+import {Op} from 'sequelize';
 
 // TODO: port this to TS later
 
@@ -6,8 +6,8 @@ const itemsPerPageLimit = 100;
 
 // alterationType - createdAt, updatedAt
 // TODO: implement filter for timestamp deletedAt
-function timestampFilter(alterationType, startTime, endTime) {
-    const filter = {};
+export function timestampFilter(alterationType: string, startTime: Date, endTime: Date) {
+    const filter = {} as DynamicObject;
     filter[alterationType] = {
         [Op.and]: {
             [Op.gte]: startTime,
@@ -18,7 +18,7 @@ function timestampFilter(alterationType, startTime, endTime) {
 }
 
 // TODO: make this shorter
-function parseQuery(query, currentToken, allowCustomToken) {
+export function parseQuery(query: DynamicObject, currentToken: string, allowCustomToken: boolean) {
     let finalQuery = {...query};
 
     if (query.alterationType !== undefined) {
@@ -64,8 +64,8 @@ function parseQuery(query, currentToken, allowCustomToken) {
     return finalQuery;
 }
 
-function parseQueryArray(queries, currentToken, allowCustomToken) {
-    let finalQueries = [];
+export function parseQueryArray(queries: Array<DynamicObject>, currentToken: string, allowCustomToken: boolean) {
+    const finalQueries = [];
     for (const query of queries) {
         finalQueries.push(
             parseQuery(query, currentToken, allowCustomToken),
@@ -74,9 +74,3 @@ function parseQueryArray(queries, currentToken, allowCustomToken) {
 
     return finalQueries;
 }
-
-module.exports = {
-    parseQuery,
-    parseQueryArray,
-    timestampFilter,
-};
