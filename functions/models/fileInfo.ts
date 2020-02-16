@@ -30,6 +30,8 @@ const fileInfoModel = {
     deletedAt: DataTypes.DATE,
 };
 export class FileInfoSchema extends Model {
+    public id!: number;
+
     public bucket!: string;
     public path!: string;
     public filename!: string;
