@@ -32,6 +32,7 @@ export class InMemoryJobsPool<T> implements JobsPool<T> {
     }
 }
 
+
 export interface Worker {
     startNewInstance(): Promise<void>;
     isRunning(): Promise<boolean>;
