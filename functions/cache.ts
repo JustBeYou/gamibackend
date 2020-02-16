@@ -1,3 +1,5 @@
+import {firestore} from './database';
+
 export interface KeyValueCache<K, V> {
     get(key: K): Promise<V>;
     set(key: K, value: V): Promise<void>;
@@ -35,5 +37,28 @@ export class InMemoryCache<V> implements KeyValueCache<string, V> {
 
     public contains(key: string) {
         return Promise.resolve(this.store[key] !== undefined);
+    }
+}
+
+export class FirestoreCache<V> implements KeyValueCache<string, V> {
+    public async get(key: string) {
+        const doc = await firestore.collection('cache').doc(key).get();
+        if (doc.exists === false) throw new Error(`Key ${key} not found.`);
+        return Promise.resolve(doc.data()! as V);
+    }
+
+    public async set(key: string, value: V) {
+        await firestore.collection('cache').doc(key).set(value);
+        return Promise.resolve();
+    }
+
+    public async unset(key: string) {
+        await firestore.collection('cache').doc(key).delete();
+        return Promise.resolve();
+    }
+
+    public async contains(key: string) {
+        const doc = await firestore.collection('cache').doc(key).get();
+        return Promise.resolve(doc.exists);
     }
 }
