@@ -3,10 +3,9 @@ import {RelationalDatabase} from '../database';
 
 // createdAt, updatedAt, deletedAt are created by default
 
-// TODO: unique attribute is not working, Sequelize bug
 const identifierModel = {
     key: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255),
         unique: true,
         allowNull: false,
         validate: {
