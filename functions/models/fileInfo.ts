@@ -10,12 +10,12 @@ const fileInfoModel = {
     // TODO: what are derivations???
     extension: DataTypes.STRING,
     
-    sizeInBytes: DataTypes.NUMBER,
-    resolutionInPixels: DataTypes.NUMBER,
-    timeDuration: DataTypes.NUMBER,
-    FPS: DataTypes.NUMBER,
-    processingRanking: DataTypes.NUMBER,
-    estimatedProcessingTimeInMinutes: DataTypes.NUMBER,
+    sizeInBytes: DataTypes.BIGINT,
+    resolutionInPixels: DataTypes.BIGINT,
+    timeDuration: DataTypes.INTEGER,
+    FPS: DataTypes.INTEGER,
+    processingRanking: DataTypes.INTEGER,
+    estimatedProcessingTimeInMinutes: DataTypes.INTEGER,
     // NOT_PROCESSED, IN_QUEUE, PROCESSING, PROCESSED
     status: DataTypes.STRING,
     
@@ -30,6 +30,8 @@ const fileInfoModel = {
     deletedAt: DataTypes.DATE,
 };
 export class FileInfoSchema extends Model {
+    public id!: number;
+
     public bucket!: string;
     public path!: string;
     public filename!: string;

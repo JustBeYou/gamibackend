@@ -41,7 +41,9 @@ describe('Identifier CRUD API', () => {
         expect(res).to.have.status(400);
     });
 
-    xstep('Duplicate key not allowed (bug)', async () => {
+    // Failing is caused by a SQLite bug, it is working on MySQL
+    // So no problem with it
+    xstep('Duplicate key not allowed (SQLite bug, not a problem for production)', async () => {
         const dataset = createDataset();
 
         await createIdentifiers([dataset]);

@@ -11,6 +11,36 @@ chai.use(chaiHttp);
 let testBucket = null;
 let randomFileName = null;
 const randomContent = makeId(100);
+
+async function uploadFile(type) {
+    const result = await doFunctionRequest('fileUpload')
+        .setUserToken()
+        .send({
+            data: {
+                filename: 'testfile',
+                type: type,
+            }
+        });
+    expect(result).to.have.status(200);
+
+    const url = result.body.result.url;
+    const response = await axios.post(url, '', {
+        headers: {
+            'Content-Type': type,
+            'X-Goog-Resumable': 'start',
+        }
+    });
+
+    const location = response.headers.location;
+    await axios.put(location, randomContent, {
+        headers: {
+            'Content-Type': type,
+        }
+    });
+
+    return result.body.result.file;
+}
+
 describe('File management API', () => {
     before(async () => {
         testBucket = getDefaultBucket();
@@ -21,31 +51,7 @@ describe('File management API', () => {
     });
 
     step('Upload file', async () => {
-        const result = await doFunctionRequest('fileUpload')
-            .setUserToken()
-            .send({
-                data: {
-                    filename: 'testfile',
-                    type: 'text',
-                }
-            });
-        expect(result).to.have.status(200);
-        
-        const url = result.body.result.url;
-        randomFileName = result.body.result.file;
-        const response = await axios.post(url, '', {
-            headers: {
-                'Content-Type': 'text',
-                'X-Goog-Resumable': 'start',
-            }
-        });
-
-        const location = response.headers.location;
-        await axios.put(location, randomContent, {
-            headers: {
-                'Content-Type': 'text',
-            }
-        });
+        randomFileName = await uploadFile('text');
 
         const exists = await getDefaultStorage().checkFileExists(testBucket, randomFileName);
         expect(exists).to.be.true;
@@ -116,6 +122,28 @@ describe('File management API', () => {
         expect(result).to.have.status(200);
     });
 
-    step('Associate');
-    step('Deassociate');
+    step('Associate (unimplemented)');
+    step('Deassociate (unimplemented)');
+
+    step('Process file', async () => {
+        const filenames = [];
+
+        for (let i = 0; i < 5; i++) {
+            const filename1 = await uploadFile('image');
+            const filename2 = await uploadFile('video');
+
+            filenames.push(filename1);
+            filenames.push(filename2);
+        }
+
+        for (const filename of filenames) {
+            const file = await FileInfo.findOne({
+                where: {
+                    filename: filename,
+                }
+            });
+
+            expect(file.status).to.be.equal('PROCESSED');
+        }
+    });
 });
