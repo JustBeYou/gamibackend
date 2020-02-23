@@ -1,8 +1,38 @@
+import {firestore} from './database';
+import {uuid} from 'uuidv4';
+
 export interface JobsPool<T> {
     add(job: T): Promise<void>;
     extract(): Promise<T>;
     isEmpty(): Promise<boolean>;
     count(): Promise<number>;
+    getConnectionString(): string;
+}
+
+export class FirestoreJobsPool<T> implements JobsPool<T> {
+    public async add(job: T) {
+        await firestore.collection('queue').doc(uuid()).set(job);
+        return Promise.resolve();
+    }
+
+    public getConnectionString() {
+        return 'firestore:queue';
+    }
+
+    public extract() {
+        throw new Error('This method is useless in the context of cloud functions.');
+        return Promise.resolve({} as T);
+    }
+
+    public count() {
+        throw new Error('This method is useless in the context of cloud functions.');
+        return Promise.resolve(-1);
+    }
+
+    public isEmpty() {
+        throw new Error('You should not use this method using Firestore!');
+        return Promise.resolve(true);
+    }
 }
 
 export class InMemoryJobsPool<T> implements JobsPool<T> {
@@ -29,6 +59,11 @@ export class InMemoryJobsPool<T> implements JobsPool<T> {
 
     public count() {
         return Promise.resolve(this.store.length);
+    }
+
+    public getConnectionString() {
+        //throw new Error('Not relevant in testing environment.');
+        return 'Fake jobs pool';
     }
 }
 
