@@ -10,6 +10,7 @@ import {initializeCollectionTables} from './models/collection';
 import {initializeModuleTables} from './models/module';
 import {initializeFileInfoTables} from './models/fileInfo';
 import { getDefaultBucket } from './storage';
+import { getDefaultWorker } from './file/fileProcessingJobsPool';
 
 const loggerOutput = console;
 function logger(req: Request, res: Response, next: Function) {
@@ -49,13 +50,19 @@ function loadFunctions() {
     const debugApp = express();
     addMiddlewares(debugApp);
     const router = express.Router();
-    router.get('/', async (req: Request, res: Response) => {
+    router.get('/createDbSchema', async (req: Request, res: Response) => {
         const connection = getMainDatabase().getConnectionObject();
-        await connection.sync({alter: true, logging: console.log});
+        await connection.dropAllSchemas();
+        await connection.sync({alter: true, logging: console.log, force: true});
+        res.json({status: 'ok'});
+    });
+
+    router.get('/createVM', async (req: Request, res: Response) => {
+        await getDefaultWorker().applyStrategy();
         res.json({status: 'ok'});
     });
     debugApp.use(router);
-    exports['createDbSchema'] = functions.https.onRequest(debugApp);
+    exports['debug'] = functions.https.onRequest(debugApp);
 }
 
 function initializeApplication() {
