@@ -41,24 +41,30 @@ export class InMemoryCache<V> implements KeyValueCache<string, V> {
 }
 
 export class FirestoreCache<V> implements KeyValueCache<string, V> {
+    private collectionName: string;
+    
+    public constructor(collectionName: string = 'cache') {
+        this.collectionName = collectionName;
+    }
+
     public async get(key: string) {
-        const doc = await firestore.collection('cache').doc(key).get();
+        const doc = await firestore.collection(this.collectionName).doc(key).get();
         if (doc.exists === false) throw new Error(`Key ${key} not found.`);
         return Promise.resolve(doc.data()! as V);
     }
 
     public async set(key: string, value: V) {
-        await firestore.collection('cache').doc(key).set(value);
+        await firestore.collection(this.collectionName).doc(key).set(value);
         return Promise.resolve();
     }
 
     public async unset(key: string) {
-        await firestore.collection('cache').doc(key).delete();
+        await firestore.collection(this.collectionName).doc(key).delete();
         return Promise.resolve();
     }
 
     public async contains(key: string) {
-        const doc = await firestore.collection('cache').doc(key).get();
+        const doc = await firestore.collection(this.collectionName).doc(key).get();
         return Promise.resolve(doc.exists);
     }
 }
