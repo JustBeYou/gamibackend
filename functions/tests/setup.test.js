@@ -8,6 +8,7 @@ const express = require('express');
 const storage = require('../storage');
 const concat = require('concat-stream');
 const utils = require('./utils');
+const fileProcessingJobsPool = require('../file/fileProcessingJobsPool');
 
 class TestingDatabase {
     constructor() {
@@ -113,6 +114,8 @@ before(async () => {
     const mockStorage = new TestingStorage();
     storage.setDefaultStorage(mockStorage);
     storage.setDefaultBucket('gamibackend_testbucket');
+
+    fileProcessingJobsPool.enableTestingWorker();
 });
 
 after(() => {
