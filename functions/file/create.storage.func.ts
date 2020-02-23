@@ -1,7 +1,7 @@
 import { ObjectMetadata } from "firebase-functions/lib/providers/storage";
 import {FileInfo} from '../models/fileInfo';
 import { fileCreationCache } from "./creationCache";
-import { defaultJobsPool, ProcessingJob, defaultWoker } from "./fileProcessingJobsPool";
+import { defaultJobsPool, ProcessingJob, getDefaultWorker } from "./fileProcessingJobsPool";
 
 const shouldProcess: Array<string | undefined> = ['video', 'image'];
 
@@ -27,6 +27,6 @@ export default async function(fileMetadata: ObjectMetadata) {
             id: createdFile.id,
         } as ProcessingJob);
         
-        await defaultWoker.applyStrategy();
+        await getDefaultWorker().applyStrategy();
     }
 }
