@@ -32,9 +32,12 @@ export class SQLiteDatabase implements RelationalDatabase {
 
 export class GoogleMySQLDatabase implements RelationalDatabase {
     private static dbConnection: Sequelize = new Sequelize('gami', 'gami', 'qwerty123456', {
-        host: '35.233.1.255',
-        port: 3306,
-        dialect: 'mysql',
+        //host: '35.233.1.255',
+        //port: 3306,
+        dialect: 'mysql', 
+        dialectOptions: {
+            socketPath: '/cloudsql/gamibackend:europe-west1:gamidatabase',
+        }
     });
     public getConnectionObject(): any {
         return GoogleMySQLDatabase.dbConnection;
@@ -45,7 +48,7 @@ export class GoogleMySQLDatabase implements RelationalDatabase {
     }
 }
 
-let defaultMainDatabase: RelationalDatabase = new SQLiteDatabase();
+let defaultMainDatabase: RelationalDatabase = new GoogleMySQLDatabase();
 
 export function setMainDatabase(newDatabase: RelationalDatabase) {
     defaultMainDatabase = newDatabase;
