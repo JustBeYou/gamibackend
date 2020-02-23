@@ -128,7 +128,7 @@ describe('File management API', () => {
     step('Process file', async () => {
         const filenames = [];
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 2; i++) {
             const filename1 = await uploadFile('image');
             const filename2 = await uploadFile('video');
 
