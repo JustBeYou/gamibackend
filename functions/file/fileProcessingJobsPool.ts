@@ -1,4 +1,4 @@
-import { Worker, JobsPool, FirestoreJobsPool } from '../jobsPool';
+import { Worker, JobsPool, FirestoreJobsPool, InMemoryJobsPool } from '../jobsPool';
 import { FileInfo } from '../models/fileInfo';
 import { uuid } from 'uuidv4';
 
@@ -7,7 +7,7 @@ export type ProcessingJob = {
     id: number,
 };
 
-export const defaultJobsPool = new FirestoreJobsPool<ProcessingJob>();
+export let defaultJobsPool: JobsPool<ProcessingJob> = new FirestoreJobsPool<ProcessingJob>();
 
 const Compute = require('@google-cloud/compute');
 export class GoogleCloudWorker implements Worker {
@@ -193,5 +193,6 @@ export function getDefaultWorker() {
 }
 
 export function enableTestingWorker() {
+    defaultJobsPool = new InMemoryJobsPool<ProcessingJob>();
     defaultWorker = new FakeWorker(defaultJobsPool);
 }
