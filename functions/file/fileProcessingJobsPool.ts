@@ -200,7 +200,7 @@ export class FakeWorker implements Worker {
     }
 
     public async applyStrategy() {
-        if (this._isRunning === false && await this.jobsPool.count() >= 4) {
+        if (this._isRunning === false && await this.jobsPool.count() > 0) {
             this.startNewInstance()
                 .then(() => {
                     //console.log("Instance shutting down...");
