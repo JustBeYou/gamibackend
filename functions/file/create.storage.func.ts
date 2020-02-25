@@ -25,6 +25,8 @@ export default async function(fileMetadata: ObjectMetadata) {
     if (preevaluatedStatus === 'NOT_PROCESSED') {
         await defaultJobsPool.add({
             id: createdFile.id,
+            type: fileMetadata.contentType,
+            filename: createdFile.filename,
         } as ProcessingJob);
         
         await getDefaultWorker().applyStrategy();
