@@ -14,9 +14,15 @@ const identifierModel = {
     },
     parentToken: DataTypes.UUID,
     // RANDOMIZER, CYCLIC, SINGLE, CHRONO, RESERVED
-    behavior: DataTypes.STRING,
+    behavior: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
 
-    logic: DataTypes.STRING,
+    logic: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
 
     updatedByToken: DataTypes.UUID,
     deletedByToken: DataTypes.UUID,
