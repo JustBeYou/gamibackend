@@ -18,7 +18,6 @@ router.post(
         const isAdmin = context.check('ADMIN_ITEMS');
         
         await errorHandlers.safeResponse(res, async() => {
-            // TODO: add file into processing queue
             const file = await FileInfo.findOne({
                 where: {
                     filename: req.body.data.filename,

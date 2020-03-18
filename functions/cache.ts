@@ -7,8 +7,6 @@ export interface KeyValueCache<K, V> {
     contains(key: K): Promise<boolean>;
 }
 
-// TODO: implement Caching using a service
-// In memory caching won't work on Google Cloud Functions
 type InMemoryCacheStore<V> = {
     [key: string]: V,
 };

@@ -34,7 +34,6 @@ describe('Access Code CRUD API', () => {
         parentCollectionId = created.body.result.collection.id;
     });
 
-    // TODO: re-enable this after mocking firebase
     step('Create', async () => {
         const result = await createAccessCode();
         expect(result).to.have.status(200);
