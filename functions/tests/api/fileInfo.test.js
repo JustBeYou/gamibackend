@@ -1,7 +1,7 @@
 const chai = require('chai');
 const expect = chai.expect;
 const chaiHttp = require('chai-http');
-const {doFunctionRequest, makeId} = require('../utils');
+const {doFunctionRequest, makeId, userToken} = require('../utils');
 const axios = require('axios');
 const {getDefaultBucket, getDefaultStorage} = require('../../storage');
 const {FileInfo} = require('../../models/fileInfo');
@@ -141,7 +141,7 @@ describe('File management API', () => {
         testModule = await Module.create({
             type: 'UNDEFINED',
             index: 0,
-            parentToken: 'user_token',
+            parentToken: userToken,
         });
 
         const result = await doFunctionRequest('fileAssociate')
