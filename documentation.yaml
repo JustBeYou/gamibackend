@@ -1,0 +1,301 @@
+openapi: 3.0.0
+info:
+  version: "1.0.0"
+  title: 'Gami API Specification'
+  description: ''
+paths:
+  /identifierCreate:
+    post:
+      tags:
+        - Identifier
+      description: Create identifiers. Please take a look at IdentifierLogic!
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Identifier'
+                    
+      responses:
+        '200':
+          description: Object created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Identifier'
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'
+
+  /identifierList:
+    post:
+      tags:
+        - Identifier
+      description: List multiple identifiers using search filters. For time based searching take a look at TimeSearchFilter schema.
+      requestBody:
+        required: True
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    query:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Identifier'
+      responses:
+        '200':
+          description: Object created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Identifier'
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'
+          
+  /identifierModify:
+    post:
+      tags:
+        - Identifier
+      description: Modify identifiers selected by id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IdentifierUpdate'
+                    
+      responses:
+        '200':
+          description: Object created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Identifier'
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'      
+
+  /identifierDelete:
+    post:
+      tags:
+        - Identifier
+      description: Delete identifiers selected by id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    
+      responses:
+        '200':
+          description: Object created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'      
+
+  /identifierRead:
+    post:
+      tags:
+        - Identifier
+      description: Return associated collections of multiple identifiers based on their internal logic.
+      requestBody:
+        required: True
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    query:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Identifier'
+      responses:
+        '200':
+          description: Object created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      type: integer
+
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'
+
+components:
+  responses:
+    AuthError:
+      description: Insufficient permissions or invalid token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                description: Error cause.
+                type: string
+                
+    ServerError:
+      description: Empty query/empty body or processing error like using invalid arguments.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                description: Error cause.
+                type: string
+
+  securitySchemes:
+    ApiKeyAuth:       
+      type: apiKey
+      in: header       
+      name: token
+
+  schemas:
+    Identifier:
+      type: object
+      required:
+        - key
+        - behavior
+        - logic
+      properties:
+        id:
+          type: integer
+        key:
+          type: string
+        parentToken:
+          type: string
+        behavior:
+          type: string
+          enum:
+            - RANDOMIZER
+            - CYCLIC
+            - SINGLE
+            - CHRONO
+            - RESERVED
+        logic:
+          $ref: '#/components/schemas/IdentifierLogic'
+        updatedByToken:
+          type: string
+        deletedByToken:
+          type: string
+          
+    IdentifierLogic:
+      description: This should be serialized as a STRING. Don\'t send it as an object.
+      type: object
+      required:
+        - assocCollections
+      properties:
+        assocCollections:
+          type: array
+          items:
+            type: integer
+            
+    IdentifierUpdate:
+      description: Update schema for Identifiers.
+      type: object
+      required:
+        - id
+        - update
+      properties:
+        id:
+          type: integer
+        update:
+          $ref: '#/components/schemas/Identifier'
+            
+    TimeSearchFilter:
+      description: This describes how to search objects based on create/update/delete times. Add an object like this in any search query.
+      type: object
+      required:
+        - alterationTypeName
+      properties:
+        alterationTypeName:
+          description: This can be named \'updatedAt\', \'createdAt\' or \'deletedAt\'
+          type: object
+          properties:
+            startTime:
+              description: Standard Javascript Datetime format
+              type: string
+            endTime:
+              description: Standard Javascript Datetime format
+              type: string
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Identifier
+    description: Identifier CRUD operations. Notice that some of the routes take as input or return ids. Ids are in general a single integer, but they can be an array of integers too (to specify multiple elements).
+    
+
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/JustBeYou/Gamibackend/1.0.0
