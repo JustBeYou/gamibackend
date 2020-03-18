@@ -5,11 +5,13 @@ const {doFunctionRequest, makeId} = require('../utils');
 const axios = require('axios');
 const {getDefaultBucket, getDefaultStorage} = require('../../storage');
 const {FileInfo} = require('../../models/fileInfo');
+const {Module} = require('../../models/module');
 
 chai.use(chaiHttp);
 
 let testBucket = null;
 let randomFileName = null;
+let testModule = null;
 const randomContent = makeId(100);
 
 async function uploadFile(type) {
@@ -122,8 +124,77 @@ describe('File management API', () => {
         expect(result).to.have.status(200);
     });
 
-    step('Associate (unimplemented)');
-    step('Deassociate (unimplemented)');
+    step('Associate', async () => {
+        const resp = await doFunctionRequest('fileList')
+            .setUserToken()
+            .send({
+                data: {
+                    query: [
+                        {
+                            filename: randomFileName,
+                        },
+                    ]
+                }   
+            });
+        const file = resp.body.result[0][0];
+        
+        testModule = await Module.create({
+            type: 'UNDEFINED',
+            index: 0,
+            parentToken: 'user_token',
+        });
+
+        const result = await doFunctionRequest('fileAssociate')
+            .setUserToken()
+            .send({
+                data: {
+                    filename: file.filename,
+                    ModuleId: testModule.id,
+                }
+            });
+
+        expect(result).to.have.status(200);
+
+        const fileInfos = await testModule.getFileInfos();
+        const filteredFileInfos = fileInfos.filter((fileInfo) => {
+            return fileInfo.id === file.id;
+        });
+
+        expect(filteredFileInfos).to.have.length(1);
+    });
+
+    step('Deassociate', async () => {
+        const resp = await doFunctionRequest('fileList')
+        .setUserToken()
+        .send({
+            data: {
+                query: [
+                    {
+                        filename: randomFileName,
+                    },
+                ]
+            }   
+        });
+        const file = resp.body.result[0][0];
+
+        const result = await doFunctionRequest('fileDeassociate')
+            .setUserToken()
+            .send({
+                data: {
+                    filename: file.filename,
+                    ModuleId: testModule.id,
+                }
+            });
+
+        expect(result).to.have.status(200);
+
+        const fileInfos = await testModule.getFileInfos();
+        const filteredFileInfos = fileInfos.filter((fileInfo) => {
+            return fileInfo.id === file.id;
+        });
+
+        expect(filteredFileInfos).to.have.length(0);
+    });
 
     step('Process file', async () => {
         const filenames = [];
