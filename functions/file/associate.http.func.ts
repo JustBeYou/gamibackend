@@ -5,6 +5,8 @@ import { FileInfo } from '../models/fileInfo';
 import { Module } from '../models/module';
 import * as moduleErrorHandlers from '../module/errorHandlers';
 import * as fileInfoErrorHandlers from './errorHandlers';
+import { getMainDatabase } from '../database';
+import { Transaction } from 'sequelize/types';
 
 const router = Router();
 export default router;
@@ -20,21 +22,25 @@ router.post(
         const isAdmin = context.check('ADMIN_ITEMS');
 
         await errorHandlers.safeResponse(res, async() => {
-            const parentModule = await Module.findOne({
-                where: {
-                    id: req.body.data.ModuleId
-                }
+            await getMainDatabase().executeTransaction(async (transaction: Transaction) => {
+                const parentModule = await Module.findOne({
+                    where: {
+                        id: req.body.data.ModuleId
+                    },
+                    transaction,
+                });
+                const validParentModule = moduleErrorHandlers.validateReference(parentModule, context.token, isAdmin);
+    
+                const fileInfo = await FileInfo.findOne({
+                    where: {
+                        filename: req.body.data.filename
+                    },
+                    transaction,
+                });
+                const validFileInfo = fileInfoErrorHandlers.validateReference(fileInfo, context.token, isAdmin);
+    
+                await validParentModule.addFileInfo(validFileInfo, {transaction});
             });
-            const validParentModule = moduleErrorHandlers.validateReference(parentModule, context.token, isAdmin);
-
-            const fileInfo = await FileInfo.findOne({
-                where: {
-                    filename: req.body.data.filename
-                }
-            });
-            const validFileInfo = fileInfoErrorHandlers.validateReference(fileInfo, context.token, isAdmin);
-
-            await validParentModule.addFileInfo(validFileInfo);
 
             res.json({status: 'ok'});
         });
