@@ -1,6 +1,12 @@
 import {Model, DataTypes, Association} from 'sequelize';
 import {RelationalDatabase} from '../database';
 import {Module, ModuleSchema} from './module';
+import { HasManyGetAssociationsMixin, 
+    HasManyAddAssociationMixin, 
+    HasManyHasAssociationMixin, 
+    HasManyCountAssociationsMixin, 
+    HasManyCreateAssociationMixin } from 'sequelize';
+
 
 const collectionModel = {
     title: {
@@ -60,6 +66,14 @@ export class CollectionSchema extends Model {
     public static associations: {
         Modules: Association<CollectionSchema, ModuleSchema>,
     };
+
+    public readonly modules?: Module[];
+
+    public getModules!: HasManyGetAssociationsMixin<Module>;
+    public addModule!: HasManyAddAssociationMixin<Module, number>;
+    public hasModule!: HasManyHasAssociationMixin<Module, number>;
+    public countModules!: HasManyCountAssociationsMixin;
+    public createModule!: HasManyCreateAssociationMixin<Module>;
 }
 
 export class Collection extends CollectionSchema {}

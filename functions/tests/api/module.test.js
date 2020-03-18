@@ -16,6 +16,8 @@ function createModule(dataset) {
 
 describe('Module CRUD API', () => {
     let parentCollectionId = 0;
+    let temporaryCollection = null;
+    let temporaryModule = null;
 
     before(async () => {
         const created = await Collection.create({
@@ -25,6 +27,20 @@ describe('Module CRUD API', () => {
         });
 
         parentCollectionId = created.id;
+        
+        
+        temporaryCollection = await Collection.create({
+            title: makeId(10),
+            accessStatus: 'PUBLIC',
+            parentToken: userToken,
+        });
+
+        temporaryModule = (await createModule({
+            CollectionId: parentCollectionId,
+            type: 'TEXT',
+            text: 'this is some text',
+            parentToken: userToken,
+        })).body.result;
     });
 
     step('Create simple', async () => {
@@ -121,7 +137,42 @@ describe('Module CRUD API', () => {
         expect(found.body.result[0].inactive).to.be.equal(true);
     });
 
-    step('Associate (unimplemented)');
+    step('Associate', async () => {
+        const result = await doFunctionRequest('moduleAssociate')
+            .setUserToken()
+            .send({
+                data: {
+                    ModuleId: temporaryModule.id,
+                    CollectionId: temporaryCollection.id,
+                }
+            });
 
-    step('Deassociate (unimplemented)');
+        expect(result).to.have.status(200);
+
+        const childModules = await temporaryCollection.getModules();
+        const filteredChildModules = childModules.filter((module) => {
+            return module.id === temporaryModule.id;
+        });
+
+        expect(filteredChildModules).to.have.length(1);
+    });
+
+    step('Deassociate',  async () => {
+        const result = await doFunctionRequest('moduleDeassociate')
+            .setUserToken()
+            .send({
+                data: {
+                    ModuleId: temporaryModule.id,
+                }
+            });
+        
+        expect(result).to.have.status(200);
+
+        const childModules = await temporaryCollection.getModules();
+        const filteredChildModules = childModules.filter((module) => {
+            return module.id === temporaryModule.id;
+        });
+
+        expect(filteredChildModules).to.have.length(0);
+    });
 });
