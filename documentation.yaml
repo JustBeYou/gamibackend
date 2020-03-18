@@ -23,7 +23,7 @@ paths:
                     
       responses:
         '200':
-          description: Object created
+          description: Created objects
           content:
             application/json:
               schema:
@@ -61,7 +61,7 @@ paths:
                         $ref: '#/components/schemas/Identifier'
       responses:
         '200':
-          description: Object created
+          description: Found objects
           content:
             application/json:
               schema:
@@ -99,7 +99,7 @@ paths:
                     
       responses:
         '200':
-          description: Object created
+          description: Modified objects
           content:
             application/json:
               schema:
@@ -136,7 +136,7 @@ paths:
                     
       responses:
         '200':
-          description: Object created
+          description: Just ok
           content:
             application/json:
               schema:
@@ -171,7 +171,7 @@ paths:
                         $ref: '#/components/schemas/Identifier'
       responses:
         '200':
-          description: Object created
+          description: Referenced collection(s)
           content:
             application/json:
               schema:
@@ -188,6 +188,140 @@ paths:
           $ref: '#/components/responses/ServerError'
         '403':
           $ref: '#/components/responses/AuthError'
+
+  /collectionCreate:
+    post:
+      tags:
+        - Collection
+      description: Create collection.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/Collection'
+      
+      responses:
+        '200':
+          description: Created object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    $ref: '#/components/schemas/Collection'
+
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'
+
+  /collectionList:
+    post:
+      tags:
+        - Collection
+      description: List multiple collections using search filters. For time based searching take a look at TimeSearchFilter schema.
+      requestBody:
+        required: True
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    query:
+                      $ref: '#/components/schemas/Collection'
+      responses:
+        '200':
+          description: Found objects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Collection'
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'  
+  /collectionModify:
+    post:
+      tags:
+        - Collection
+      description: Modify collection selected by id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/CollectionUpdate'
+                    
+      responses:
+        '200':
+          description: Modified object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    $ref: '#/components/schemas/Collection'
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'      
+
+  /collectionDelete:
+    post:
+      tags:
+        - Collection
+      description: Delete collections selected by id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    
+      responses:
+        '200':
+          description: Just ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'      
 
 components:
   responses:
@@ -221,6 +355,7 @@ components:
 
   schemas:
     Identifier:
+      description: An identifier references one or more collections using a custom logic.
       type: object
       required:
         - key
@@ -287,6 +422,56 @@ components:
             endTime:
               description: Standard Javascript Datetime format
               type: string
+    
+    # TODO: collection definition is incomplete. Fix
+    Collection:
+      description: A collection has multiple modules.
+      type: object
+      required:
+        - title
+        - accessStatus
+      properties:
+        title:
+          type: string
+        summary:
+          type: string
+        thumbnail:
+          type: string # TODO: this will be changed
+        accessStatus:
+          type: string
+          enum:
+            - PUBLIC
+            - PRIVATE
+        protectionType:
+          description: Used only if accessStatus is PRIVATE
+          type: string
+          enum:
+            - PASSWORD
+            - ACCESS_CODE
+        password:
+          description: Used only if protectionType is PASSWORD
+          type: string
+        accessConfiguration:
+          description: Additional configuration if protectionType is ACCESS_CODE
+          type: string
+        moduleCount:
+          type: integer
+          default: 0
+        inactive:
+          type: boolean
+          default: false
+
+    CollectionUpdate:
+      description: Update schema for Collections.
+      type: object
+      required:
+        - id
+        - update
+      properties:
+        id:
+          type: integer
+        update:
+          $ref: '#/components/schemas/Collection'
 
 security:
   - ApiKeyAuth: []
@@ -294,7 +479,8 @@ security:
 tags:
   - name: Identifier
     description: Identifier CRUD operations. Notice that some of the routes take as input or return ids. Ids are in general a single integer, but they can be an array of integers too (to specify multiple elements).
-    
+  - name: Collection
+    description: Collection CRUD operations.
 
 servers:
   - description: SwaggerHub API Auto Mocking
