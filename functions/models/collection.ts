@@ -3,14 +3,21 @@ import {RelationalDatabase} from '../database';
 import {Module, ModuleSchema} from './module';
 
 const collectionModel = {
-    title: DataTypes.STRING,
+    title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     summary: DataTypes.TEXT,
     thumbnail: DataTypes.STRING, // TODO: change this
 
     parentToken: DataTypes.UUID,
     updatedByToken: DataTypes.UUID,
     // PUBLIC, PRIVATE
-    accessStatus: DataTypes.STRING,
+    accessStatus: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'PUBLIC',
+    },
     // PASSWORD, ACCESS_CODE
     protectionType: DataTypes.STRING,
     password: DataTypes.STRING,
