@@ -5,6 +5,8 @@ import { uuid } from 'uuidv4';
 
 export type ProcessingJob = {
     id: number,
+    type: string,
+    filename: string,
 };
 
 export let defaultJobsPool: JobsPool<ProcessingJob> = new FirestoreJobsPool<ProcessingJob>();

@@ -109,7 +109,7 @@ describe('File management API', () => {
             });
 
         expect(result).to.have.status(200);
-        expect(result.body.result.status).to.be.equal('PROCESSED');
+        expect(result.body.result.status).to.be.equal('ORIGINAL');
     });
     
     step('Mark file as deleted', async () => {
@@ -197,14 +197,27 @@ describe('File management API', () => {
     });
 
     step('Process file', async () => {
+        const originalFilenames = [];
         const filenames = [];
+        const resolutions = ['480', '720', '1080'];
 
-        for (let i = 0; i < 1; i++) {
-            const filename1 = await uploadFile('image');
-            const filename2 = await uploadFile('video');
+        for (let i = 0; i < 2; i++) {
+            const filename = await uploadFile('video');
 
-            filenames.push(filename1);
-            filenames.push(filename2);
+            originalFilenames.push(filename);
+            for (const resolution of resolutions) {
+                filenames.push(filename + resolution);
+            }
+        }
+
+        for (const filename of originalFilenames) {
+            const file = await FileInfo.findOne({
+                where: {
+                    filename: filename,
+                }
+            });
+
+            expect(file.status).to.be.equal('ORIGINAL');
         }
 
         for (const filename of filenames) {

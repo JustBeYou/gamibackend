@@ -4,17 +4,76 @@ import { fileCreationCache } from "./creationCache";
 import { defaultJobsPool, ProcessingJob, getDefaultWorker } from "./fileProcessingJobsPool";
 
 const shouldProcess: Array<string | undefined> = ['video', 'image'];
+const processingFunctions: DynamicObject = {
+    'video': addVideoInQueue,
+    'image': addImageInQueue,
+};
+
+async function addVideoInQueue(parentFile: FileInfo) {
+    const resolutions = ['480', '720', '1080'];
+
+    for (const resolution of resolutions) {
+        const newName = parentFile.filename + resolution;
+
+        const newFile = await parentFile.createFileInfo({
+            isOriginal: false,
+            bucket: parentFile.bucket,
+            originalFilename: parentFile.originalFilename,
+            filename: newName,
+            sizeInBytes: parentFile.sizeInBytes,
+            status: 'IN_QUEUE',
+            parentToken: parentFile.parentToken,
+            isSignedURLValid: false,
+            deleted: false,
+        });
+
+        defaultJobsPool.add({
+            filename: newName,
+            id: newFile.id,
+            type: 'video',
+        } as ProcessingJob);
+    }
+}
+
+async function addImageInQueue(parentFile: FileInfo) {
+    const resolutions = ['720', '1080'];
+    const orientations = ['portrait', 'landscape'];
+
+    for (const resolution of resolutions) {
+        for (const orientation of orientations) {
+            const newName = parentFile.filename + resolution + orientation;
+
+            const newFile = await parentFile.createFileInfo({
+                isOriginal: false,
+                bucket: parentFile.bucket,
+                originalFilename: parentFile.originalFilename,
+                filename: newName,
+                sizeInBytes: parentFile.sizeInBytes,
+                status: 'IN_QUEUE',
+                parentToken: parentFile.parentToken,
+                isSignedURLValid: false,
+                deleted: false,
+            });
+    
+            defaultJobsPool.add({
+                filename: newName,
+                id: newFile.id,
+                type: 'image',
+            } as ProcessingJob);
+        }
+    }
+}
 
 export default async function(fileMetadata: ObjectMetadata) {
     const originalMetadata = await fileCreationCache.get(fileMetadata.name!);
 
-    const preevaluatedStatus = shouldProcess.includes(fileMetadata.contentType) ? 'NOT_PROCESSED' : 'PROCESSED'; 
-    const createdFile = await FileInfo.create({
+    const parentFile = await FileInfo.create({
+        isOriginal: true,
         bucket: fileMetadata.bucket,
         originalFilename: originalMetadata.originalFilename,
         filename: fileMetadata.name,
         sizeInBytes: fileMetadata.size,
-        status: preevaluatedStatus,
+        status: 'ORIGINAL',
         parentToken: originalMetadata.parentToken,
         isSignedURLValid: false,
         deleted: false,
@@ -22,13 +81,8 @@ export default async function(fileMetadata: ObjectMetadata) {
 
     await fileCreationCache.unset(fileMetadata.name!);
 
-    if (preevaluatedStatus === 'NOT_PROCESSED') {
-        await defaultJobsPool.add({
-            id: createdFile.id,
-            type: fileMetadata.contentType,
-            filename: createdFile.filename,
-        } as ProcessingJob);
-        
+    if (shouldProcess.includes(fileMetadata.contentType)) {
+        await processingFunctions[fileMetadata.contentType!](parentFile);
         await getDefaultWorker().applyStrategy();
     }
 }

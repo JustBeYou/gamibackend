@@ -1,7 +1,13 @@
-import {Model, DataTypes} from 'sequelize';
+import {Model, DataTypes, Association} from 'sequelize';
 import { RelationalDatabase } from '../database';
+import { HasManyGetAssociationsMixin, 
+    HasManyAddAssociationMixin, 
+    HasManyHasAssociationMixin, 
+    HasManyCountAssociationsMixin, 
+    HasManyCreateAssociationMixin } from 'sequelize';
 
 const fileInfoModel = {
+    isOriginal: DataTypes.BOOLEAN,
     bucket: DataTypes.STRING,
     // TODO: add folder support maybe
     path: DataTypes.STRING,
@@ -16,7 +22,7 @@ const fileInfoModel = {
     FPS: DataTypes.INTEGER,
     processingRanking: DataTypes.INTEGER,
     estimatedProcessingTimeInMinutes: DataTypes.INTEGER,
-    // NOT_PROCESSED, IN_QUEUE, PROCESSING, PROCESSED
+    // NOT_PROCESSED, IN_QUEUE, PROCESSING, PROCESSED, ORIGINAL
     status: DataTypes.STRING,
     
     // TODO: 'utilizare' ???    
@@ -32,6 +38,7 @@ const fileInfoModel = {
 export class FileInfoSchema extends Model {
     public id!: number;
 
+    public isOriginal!: boolean;
     public bucket!: string;
     public path!: string;
     public filename!: string;
@@ -57,6 +64,18 @@ export class FileInfoSchema extends Model {
     public deletedAt!: Date;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
+
+    public static associations: {
+        FileInfos: Association<FileInfoSchema, FileInfo>,
+    };
+
+    public readonly fileInfos?: FileInfo[];
+
+    public getFileInfos!: HasManyGetAssociationsMixin<FileInfo>;
+    public addFileInfo!: HasManyAddAssociationMixin<FileInfo, number>;
+    public hasFileInfo!: HasManyHasAssociationMixin<FileInfo, number>;
+    public countFileInfos!: HasManyCountAssociationsMixin;
+    public createFileInfo!: HasManyCreateAssociationMixin<FileInfo>;
 }
 export class FileInfo extends FileInfoSchema {}
 
@@ -80,4 +99,6 @@ export function initializeFileInfoTables(database: RelationalDatabase) {
             modelName: 'FileInfoToModule',
         }
     );
+
+    FileInfo.hasMany(FileInfo);
 }
