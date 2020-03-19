@@ -103,7 +103,4 @@ describe('Collection CRUD API', () => {
 
         expect(found.body.result[0].inactive).to.be.equal(true);
     });
-
-    step('Check access codes (unimplemented)');
-    step('Check password access (unimplemented)');
 });
