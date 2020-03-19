@@ -41,11 +41,16 @@ function doFunctionRequest(name, customPath = '/') {
 
     requestInProgress.setAdminToken = setAdminToken;
     requestInProgress.setUserToken = setUserToken;
+    requestInProgress.setAccessCode = setAccessCode;
+    requestInProgress.setDefaultPasword = setDefaultPasword;
+    requestInProgress.setAnotherUserToken = setAnotherUserToken;
     return requestInProgress;
 }
 
 const adminToken = 'admin_token';
 const userToken = 'user_token';
+const anotherUserToken = 'another_user_token';
+const defaultPassword = 'password123';
 
 function setAdminToken() {
     this.set('token', adminToken);
@@ -56,10 +61,31 @@ function setUserToken() {
     this.set('token', userToken);
     return this;
 }
+
+function setAnotherUserToken() {
+    this.set('token', anotherUserToken);
+    return this;
+}
+
+function setDefaultPasword() {
+    this.set('code', defaultPassword);
+    return this;
+}
+
+function setAccessCode(code) {
+    this.set('code', code);
+    return this;
+}
+
 module.exports = {
     makeId,
     doFunctionRequest,
     loadStorageFunction,
     adminToken,
     userToken,
+    anotherUserToken,
+    defaultPassword,
+    setDefaultPasword,
+    setAccessCode,
+    setAnotherUserToken,
 };
