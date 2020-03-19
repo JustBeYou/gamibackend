@@ -12,14 +12,14 @@ router.post(
     '/',
     [
         permissions.necessary(['ITEMS']),
-        errorHandlers.requestEmptyQuery,
+        errorHandlers.requestEmptyData,
     ],
     async (req: Request, res: Response) => {
         const context = getValidContext(req);
         const isAdmin = context.check('ADMIN_ITEMS');
 
         await errorHandlers.safeResponse(res, async () => {
-            const collectionId = req.body.data.query.id as number;
+            const collectionId = req.body.data.CollectionId as number;
             await collectionErrorHandlers.validateReferenceById(collectionId, context.token, isAdmin);
             await accessCodes.deleteAllAccessCodes(collectionId);
             res.json({status: 'ok'});
