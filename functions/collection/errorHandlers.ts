@@ -1,29 +1,39 @@
 import { Collection, CollectionSchema } from '../models/collection';
-//import * as passwordHash from 'password-hash';
+import * as accessCodes from '../accessCodes';
+import * as passwordHash from 'password-hash';
 
-export async function validatePermissions(
-    reference: Collection, 
-    accessCode: string, 
+export async function validateReferenceAndPermissions(
+    reference: Collection | null, 
+    accessCode: string | undefined, 
     token: string, 
     isAdmin: boolean) {
     
+    if (reference === null) {
+        throw new Error('Collection not found');
+    }
+
     if (reference.parentToken === token || isAdmin) {
-        return ;
+        return reference;
     }
 
     if (reference.accessStatus === 'PUBLIC') {
-        return ;
+        return reference;
+    }
+
+    if (accessCode === undefined) {
+        throw new Error('Access code required');
     }
 
     if (reference.protectionType === 'ACCESS_CODE') {
-        // TODO: add types and remove comments here
-        //await accessCodes.verifyAccessCode(reference, accessCode, token);
+        await accessCodes.verifyAccessCode(reference, accessCode, token);
     }
     else if (reference.protectionType === 'PASSWORD') {
-        //if (passwordHash.validatePassword(accessCode, reference.password) === false) {
-        //    throw new Error('invalid password');
-        //}
+        if (passwordHash.verify(accessCode, reference.password) === false) {
+            throw new Error('invalid password');
+        }
     }
+
+    return reference;
 }
 
 export function validateReference(
