@@ -17,6 +17,17 @@ export type AccessCodeUpdateSchema = {
 
 // TODO: access codes functions are a little bit inconsistent
 export async function createAccessCode(properties: AccessCodeSchema) {
+    // TODO: improve runtime validation 
+    // This function could be useful in other parts of the code too. Need to refactor this for sure.
+    function isNullOrUndefined(obj: any) {
+        return obj === null || obj === undefined;
+    }
+
+    if (isNullOrUndefined(properties.assocTokens)) properties.assocTokens = {};
+    if (isNullOrUndefined(properties.maxUsers)) properties.maxUsers = 1;
+    if (isNullOrUndefined(properties.type)) throw new Error('Type of access code was not specified.');
+    if (isNullOrUndefined(properties.parentCollection)) throw new Error('Access code needs a parent collection.');
+    
     const newCode = await firestore.collection('accessCodes').add(properties);
     return newCode.id;
 }
@@ -70,6 +81,7 @@ export function isAssociated(codeObj: AccessCodeSchema, token: string) {
 
 export async function associate(code: string, token: string) {
     const codeDocRef = firestore.collection('accessCodes').doc(code);
+
     const result = await firestore.runTransaction(async transaction => {
         const codeRef = await transaction.get(codeDocRef);
         if (!codeRef.exists) return false;
