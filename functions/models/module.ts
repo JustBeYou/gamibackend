@@ -88,6 +88,7 @@ const moduleModel = {
 
 export class ModuleSchema extends Model {
     public id!: number;
+    public CollectionId!: number;
     public index!: number;
     public type!: string;
     public parentToken!: string;
