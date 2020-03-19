@@ -2,7 +2,9 @@ import {firestore, firebaseAdmin} from './database';
 import {Request, Response} from 'express';
 
 export class Context implements AuthContext {
-    constructor(public token: string | undefined, public tokenPermissions: PermissionsCollection | undefined) {}
+    constructor(public token: string | undefined, 
+                public tokenPermissions: PermissionsCollection | undefined,
+                public accessCode: string | undefined) {}
 
     check(permission: string): boolean {
         if (this.tokenPermissions === undefined) return false;
@@ -13,11 +15,11 @@ export class Context implements AuthContext {
 export class ValidatedContext extends Context {
     static fromAuthContext(context: AuthContext) {
         if (context.token === undefined || context.tokenPermissions === undefined) throw new Error('Not authenticated.');
-        return new ValidatedContext(context.token, context.tokenPermissions);
+        return new ValidatedContext(context.token, context.tokenPermissions, context.accessCode);
     }
 
-    constructor(public token: string, public tokenPermissions: PermissionsCollection) {
-        super(token, tokenPermissions);
+    constructor(public token: string, public tokenPermissions: PermissionsCollection, public accessCode: string | undefined) {
+        super(token, tokenPermissions, accessCode);
     }
 
     async incrementUsageCounter(permission: string): Promise<void> {
@@ -84,11 +86,14 @@ export async function getTokenPermissions(token: string | undefined): Promise<un
 }
 
 const tokenHeader = 'token';
+const accessCodeHeader = 'code';
 export async function middleware(req: Request, res: Response, next: Function) {
     const token = req.header(tokenHeader);
+    const code = req.header(accessCodeHeader);
     req.context = new Context(
         token, 
-        await getTokenPermissions(token)
+        await getTokenPermissions(token),
+        code,
     );
 
     next();
@@ -131,5 +136,5 @@ export function getContext(req: Request): Context {
 export function getValidContext(req: Request): ValidatedContext {
     const context = getContext(req);
     if (context.token === undefined || context.tokenPermissions === undefined) throw new Error('Not authenticated.');
-    return new ValidatedContext(context.token, context.tokenPermissions);
+    return new ValidatedContext(context.token, context.tokenPermissions, context.accessCode);
 }

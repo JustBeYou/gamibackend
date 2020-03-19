@@ -1,6 +1,8 @@
 declare interface AuthContext {
     token: string | undefined,
     tokenPermissions: Map<string, any> | undefined,
+    accessCode: string | undefined,
+
     check: (permission: string) => boolean,
 }
 
