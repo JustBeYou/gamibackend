@@ -1,4 +1,4 @@
-import {firestore} from './database';
+import {firestore, firebaseAdmin} from './database';
 import {Request, Response} from 'express';
 
 export class Context implements AuthContext {
@@ -6,13 +6,29 @@ export class Context implements AuthContext {
 
     check(permission: string): boolean {
         if (this.tokenPermissions === undefined) return false;
-        return validatePermission(this.tokenPermissions, permission);
+        return validatePermission(this.tokenPermissions, permission, this);
     }
 }
 
 export class ValidatedContext extends Context {
+    static fromAuthContext(context: AuthContext) {
+        if (context.token === undefined || context.tokenPermissions === undefined) throw new Error('Not authenticated.');
+        return new ValidatedContext(context.token, context.tokenPermissions);
+    }
+
     constructor(public token: string, public tokenPermissions: PermissionsCollection) {
         super(token, tokenPermissions);
+    }
+
+    async incrementUsageCounter(permission: string): Promise<void> {
+        const tokenRef = await firestore.collection('tokens').doc(this.token);
+        const incrementByOne = firebaseAdmin.firestore.FieldValue.increment(1);
+        const updateObject = {} as DynamicObject;
+        updateObject[`permissions.${permission}.currCalls`] = incrementByOne;
+
+        await tokenRef.update(updateObject);
+
+        return Promise.resolve();
     }
 }
 
@@ -28,9 +44,17 @@ export const permissionValidatorsCatalog: PermissionsCatalog = {
         return true;
     },
 
-    // TODO: currCalls is never incremented, should fix
-    LIMITED_CALLS: permissionProps => {
-        return permissionProps.get('currCalls') < permissionProps.get('maxCalls');
+    LIMITED_CALLS: (permissionProps) => {
+        const valid = permissionProps.get('currCalls') < permissionProps.get('maxCalls');
+        if (valid) {
+            const context: AuthContext = permissionProps.get('context');
+            const validContext: ValidatedContext = ValidatedContext.fromAuthContext(context);
+            const name: string = permissionProps.get('name');
+    
+            validContext.incrementUsageCounter(name);
+        }
+
+        return valid;
     },
 
     LIMITED_TIME: permissionProps => {
@@ -61,7 +85,6 @@ export async function getTokenPermissions(token: string | undefined): Promise<un
 
 const tokenHeader = 'token';
 export async function middleware(req: Request, res: Response, next: Function) {
-    // ESLINT gies a warning about race conditions here, but there is no risk of that
     const token = req.header(tokenHeader);
     req.context = new Context(
         token, 
@@ -71,9 +94,12 @@ export async function middleware(req: Request, res: Response, next: Function) {
     next();
 }
 
-export function validatePermission(permissions: PermissionsCollection, key: string): boolean {
+export function validatePermission(permissions: PermissionsCollection, key: string, context: AuthContext): boolean {
     if (!permissions.has(key)) return false;
-    const permission = new Map(Object.entries(permissions.get(key)));
+    const permission: PermissionProperties = new Map(Object.entries(permissions.get(key)));
+    // TODO: this isn't the best practice, but it works for now. maybe refactor later
+    permission.set('context', context);
+    permission.set('name', key);
         
     const type = permission.get('type');
     if (type === undefined) return false;
@@ -90,7 +116,7 @@ export function necessary(permissionsList: Array<string>) {
         }
 
         const isValid: boolean = permissionsList.reduce((maybeValid: boolean, permission: string): boolean => {
-            return maybeValid && validatePermission(tokenPermissions, permission); 
+            return maybeValid && validatePermission(tokenPermissions, permission, req.context); 
         }, true);
 
         if (isValid) next();
