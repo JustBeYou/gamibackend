@@ -10,10 +10,10 @@ const processingFunctions: DynamicObject = {
 };
 
 async function addVideoInQueue(parentFile: FileInfo) {
-    const resolutions = ['480', '720', '1080'];
+    const resolutions = [480, 720, 1080];
 
     for (const resolution of resolutions) {
-        const newName = parentFile.filename + resolution;
+        const newName = parentFile.filename + resolution.toString();
 
         const newFile = await parentFile.createFileInfo({
             isOriginal: false,
@@ -25,23 +25,28 @@ async function addVideoInQueue(parentFile: FileInfo) {
             parentToken: parentFile.parentToken,
             isSignedURLValid: false,
             deleted: false,
+
+            resolutionInPixels: resolution,
+            orientation: 'IGNORED',
         });
 
         defaultJobsPool.add({
             filename: newName,
             id: newFile.id,
             type: 'video',
+            targetResolution: resolution,
+            targetOrientation: 'IGNORED',
         } as ProcessingJob);
     }
 }
 
 async function addImageInQueue(parentFile: FileInfo) {
-    const resolutions = ['720', '1080'];
+    const resolutions = [720, 1080];
     const orientations = ['portrait', 'landscape'];
 
     for (const resolution of resolutions) {
         for (const orientation of orientations) {
-            const newName = parentFile.filename + resolution + orientation;
+            const newName = parentFile.filename + resolution.toString() + orientation;
 
             const newFile = await parentFile.createFileInfo({
                 isOriginal: false,
@@ -53,12 +58,17 @@ async function addImageInQueue(parentFile: FileInfo) {
                 parentToken: parentFile.parentToken,
                 isSignedURLValid: false,
                 deleted: false,
+
+                resolutionInPixels: resolution,
+                orientation: orientation.toUpperCase(),
             });
     
             defaultJobsPool.add({
                 filename: newName,
                 id: newFile.id,
                 type: 'image',
+                targetResolution: resolution,
+                targetOrientation: orientation,
             } as ProcessingJob);
         }
     }

@@ -7,6 +7,8 @@ export type ProcessingJob = {
     id: number,
     type: string,
     filename: string,
+    targetResolution: number,
+    targetOrientation: string,
 };
 
 export let defaultJobsPool: JobsPool<ProcessingJob> = new FirestoreJobsPool<ProcessingJob>();

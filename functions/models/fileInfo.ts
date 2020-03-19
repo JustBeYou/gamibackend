@@ -9,19 +9,22 @@ import { HasManyGetAssociationsMixin,
 const fileInfoModel = {
     isOriginal: DataTypes.BOOLEAN,
     bucket: DataTypes.STRING,
-    // TODO: add folder support maybe
     path: DataTypes.STRING,
     filename: DataTypes.STRING,
     originalFilename: DataTypes.STRING,
-    // TODO: what are derivations???
     extension: DataTypes.STRING,
     
     sizeInBytes: DataTypes.BIGINT,
     resolutionInPixels: DataTypes.BIGINT,
+    // PORTRAIT, LANDSCAPE, IGNORED
+    orientation: DataTypes.STRING,
+
+    // TODO: set this in client VM
     timeDuration: DataTypes.INTEGER,
     FPS: DataTypes.INTEGER,
     processingRanking: DataTypes.INTEGER,
     estimatedProcessingTimeInMinutes: DataTypes.INTEGER,
+
     // NOT_PROCESSED, IN_QUEUE, PROCESSING, PROCESSED, ORIGINAL
     status: DataTypes.STRING,
     
@@ -47,6 +50,7 @@ export class FileInfoSchema extends Model {
 
     public sizeInBytes!: number;
     public resolutionInPixels!: number;
+    public orientation!: string;
     public timeDuration!: number;
     public FPS!: number;
     public processingRanking!: number;
