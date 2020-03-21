@@ -6,6 +6,7 @@ import { getDefaultStorage, getDefaultBucket } from '../storage';
 const router = Router();
 export default router;
 
+// TODO: permission checking on file download!!!
 router.post(
     '/',
     [
