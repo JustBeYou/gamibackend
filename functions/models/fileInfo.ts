@@ -12,16 +12,17 @@ const fileInfoModel = {
     path: DataTypes.STRING,
     filename: DataTypes.STRING,
     originalFilename: DataTypes.STRING,
-    extension: DataTypes.STRING,
     
     sizeInBytes: DataTypes.BIGINT,
     resolutionInPixels: DataTypes.BIGINT,
     // PORTRAIT, LANDSCAPE, IGNORED
     orientation: DataTypes.STRING,
 
-    // TODO: set this in client VM
+    extension: DataTypes.STRING,
     timeDuration: DataTypes.INTEGER,
     FPS: DataTypes.INTEGER,
+
+    // TODO: this is not used yet
     processingRanking: DataTypes.INTEGER,
     estimatedProcessingTimeInMinutes: DataTypes.INTEGER,
 
