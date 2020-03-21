@@ -1,12 +1,12 @@
 import { Worker, JobsPool, FirestoreJobsPool, InMemoryJobsPool } from '../jobsPool';
 import { FileInfo } from '../models/fileInfo';
-import { uuid } from 'uuidv4';
 
 
 export type ProcessingJob = {
     id: number,
     type: string,
     filename: string,
+    originalFilename: string,
     targetResolution: number,
     targetOrientation: string,
 };
@@ -68,35 +68,84 @@ bucket = storage.bucket('gamibackend_files')
 def report_finished_processing(id):
     post(url, headers = {'token': 'vm_token'}, json = {'data': {'id': id}})
 
-def process_file(filename, type):
+def process_file(filename, type, targetFilename):
     input_filename = 'processing_' + filename
     
     blob = bucket.get_blob(filename)
     blob.download_to_filename(input_filename)
 
-    output_filename = transform(input_filename, type)
+    transform(input_filename, type, targetFilename)
 
     # Bug: content_type must be some known mime type
-    blob.upload_from_filename(output_filename, content_type = 'text/plain')
+    targetBlob = bucket.blob(targetFilename)
+    targetBlob.upload_from_filename(targetFilename, content_type = 'text/plain')
 
-def transform(filename, type):
+import subprocess
+import re
+import os
+
+def transform(filename, type, targetFilename):
     if type in transformations:
-        return transformations[type](filename)
+        return transformations[type](filename, targetFilename)
     else:
         raise Exception("Unimplemented for type {}".format(type))
 
-def transform_text(filename):
-    output_filename = 'done_' + filename
+def get_real_resolution(input_filename):
+    output = subprocess.check_output("ffprobe -v error -show_entries stream=width,height -of csv=p=0:s=x {}".format(input_filename), shell = True)
+    width, height = [int(x) for x in output.split(b'x') if x != b'']
+    orientation = 'landscape' if width > height else 'portrait'    
+    return width, height, orientation
 
-    content = open(filename).read()    
-    with open(output_filename, 'w') as f:
-        f.write(content + '\\nThis was processed by text transformer\\n')
-        f.flush()
+def get_desired_resolution(targetFilename):
+    l = targetFilename.split('.')[:-1]
+    l = ''.join(l).split('_')
+    if l[-1] in ['landscape', 'portrait']:
+        return int(l[-2]), l[-1]
+    return int(l[-1]), None
 
-    return output_filename
+def transform_video(input_filename, targetFilename):
+    if type(input_filename) == bytes:
+        input_filename = input_filename.decode('ascii')
+    if type(targetFilename) == bytes:
+        targetFilename = targetFilename.decode('ascii')
+    
+    print ('Processing {}'.format(input_filename))
+    width, height, orientation = get_real_resolution(input_filename)
+    print ("Real resolution: {}x{} {}".format(width, height, orientation))
+    desiredResolution, _ = get_desired_resolution(targetFilename)
+    print ("Desired {}p".format(desiredResolution))
+
+    os.system('ffmpeg -i {} -vf scale=-1:{} {}'.format(input_filename, desiredResolution, targetFilename))
+
+def transform_image(input_filename, targetFilename):
+    if type(input_filename) == bytes:
+        input_filename = input_filename.decode('ascii')
+    if type(targetFilename) == bytes:
+        targetFilename = targetFilename.decode('ascii')
+
+    print ('Processing {}'.format(input_filename))
+    width, height, orientation = get_real_resolution(input_filename)
+    print ("Real resolution: {}x{} {}".format(width, height, orientation))
+    desiredResolution, desiredOrientation = get_desired_resolution(targetFilename)
+    print ("Desired {}p {}".format(desiredResolution, desiredOrientation))
+
+    if orientation == 'landscape':
+        if orientation == desiredOrientation:
+            scale = "-1:{}".format(desiredResolution)
+        else:
+            scale = "{}:-1".format(desiredResolution)
+
+    elif orientation == 'portrait':
+        if orientation == desiredOrientation:
+            scale = "{}:-1".format(desiredResolution)
+        else:
+            scale = "{}:-1".format(desiredResolution)
+
+    os.system('ffmpeg -i {} -vf scale={} {}'.format(input_filename, scale, targetFilename))
 
 transformations = {
-    'text': transform_text
+    'image': transform_image,
+    'video': transform_video,
 }
 
 #request_check('getting files')
@@ -108,7 +157,7 @@ while True:
         break
 
     data = snapshot.to_dict()
-    process_file(data['filename'], data['type'])
+    process_file(data['originalFilename'], data['type'], data['filename'])
     report_finished_processing(data['id'])
     queue.document(snapshot.id).delete()
 
@@ -160,7 +209,8 @@ system("gcloud auth activate-service-account --key-file=/tmp/serviceAccountKey.j
     }
     
     private async createInstance() {
-        const [vm, operation] = await this.api.createVM('fileprocessing' + uuid(), {
+        const [vm, operation] = await this.api.createVM('fileprocessing', {
+            machineType: 'n1-standard-4',
             os: 'debian',
             http: true,
             https: true,
