@@ -358,10 +358,16 @@ components:
                 type: string
 
   securitySchemes:
-    ApiKeyAuth:       
+    TokenAuth:
+      description: Each user is identified by a token with certain permissions.
       type: apiKey
       in: header       
       name: token
+    AccessCodeAuth:
+      description: Some collections could be protected by an access code or password. You can provide it in this header.
+      type: apiKey
+      in: header
+      name: code
 
   schemas:
     Identifier:
@@ -542,7 +548,8 @@ components:
           type: string
 
 security:
-  - ApiKeyAuth: []
+  - TokenAuth: []
+  - AccessCodeAuth: []
 
 tags:
   - name: Identifier
