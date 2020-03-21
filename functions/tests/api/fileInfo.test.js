@@ -19,7 +19,7 @@ async function uploadFile(type) {
         .setUserToken()
         .send({
             data: {
-                filename: 'testfile',
+                filename: 'testfile.txt',
                 type: type,
             }
         });
@@ -96,7 +96,7 @@ describe('File management API', () => {
         expect(result).to.have.status(200);
         expect(result.body.result.length).to.be.equal(1);
         expect(result.body.result[0][0].filename).to.be.equal(randomFileName);
-        expect(result.body.result[0][0].originalFilename).to.be.equal('testfile');
+        expect(result.body.result[0][0].originalFilename).to.be.equal('testfile.txt');
     });
 
     step('Check file status', async () => {
@@ -206,7 +206,7 @@ describe('File management API', () => {
 
             originalFilenames.push(filename);
             for (const resolution of resolutions) {
-                filenames.push(filename + resolution);
+                filenames.push(`${filename.replace('.txt', '')}_${resolution.toString()}.mp4`);
             }
         }
 
