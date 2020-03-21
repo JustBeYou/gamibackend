@@ -95,7 +95,12 @@ paths:
                 data:
                   type: array
                   items:
-                    $ref: '#/components/schemas/IdentifierUpdate'
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      update:
+                        $ref: '#/components/schemas/Identifier'
                     
       responses:
         '200':
@@ -270,7 +275,12 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/CollectionUpdate'
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    update:
+                      $ref: '#/components/schemas/Collection'
                     
       responses:
         '200':
@@ -394,18 +404,6 @@ components:
           items:
             type: integer
             
-    IdentifierUpdate:
-      description: Update schema for Identifiers.
-      type: object
-      required:
-        - id
-        - update
-      properties:
-        id:
-          type: integer
-        update:
-          $ref: '#/components/schemas/Identifier'
-            
     TimeSearchFilter:
       description: This describes how to search objects based on create/update/delete times. Add an object like this in any search query.
       type: object
@@ -436,6 +434,7 @@ components:
         summary:
           type: string
         thumbnail:
+          description: Thumbnail filename
           type: string # TODO: this will be changed
         accessStatus:
           type: string
@@ -461,17 +460,86 @@ components:
           type: boolean
           default: false
 
-    CollectionUpdate:
-      description: Update schema for Collections.
+    Module:
+      description: Building blocks of a Collection. Generic structure for multiple types of data.
       type: object
       required:
-        - id
-        - update
+        - CollectionId
+        - type
       properties:
-        id:
+        CollectionId:
+          description: Parent collection id.
           type: integer
-        update:
-          $ref: '#/components/schemas/Collection'
+        index:
+          description: Internal index inside the parent collection.
+          type: integer
+        type:
+          description: Concrete module type.
+          type: string
+          enum:
+            - IMAGE
+            - VIDEO
+            - LIST
+            - TEXT
+            - CONTACT
+        parentToken:
+          type: string
+        updatedByToken:
+          type: string
+        deletedByToken:
+          type: string
+        inactive:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string
+    
+    ModuleVideo:
+      type: object
+      description: Concrete module for storing videos.
+
+    ModuleImage:
+      type: object
+      description: Concrete module for storing images.
+
+    ModuleList:
+      type: object
+      description: Concrete module for storing a list of links.
+      properties:
+        icon:
+          description: Icon filename
+          type: string
+        info:
+          description: Short description
+          type: string
+        links:
+          description: Array of links, JSON string
+          type: string
+
+    ModuleText:
+      type: object
+      description: Concrete module for storing text data.
+      properties:
+        text:
+          description: Array of objects containing text and their font, size and other stylings. The clinet should decide the format. JSON string.
+          type: string
+
+    ModuleContact:
+      type: object
+      description: Concrete module for storing contact information.
+      properties:
+        emails:
+          description: Object, each key stores an email. JSON string
+          type: string
+        phoneNumbers:
+          description: Object, each key stores a phone number. JSON string
+          type: string
+        addresses:
+          description: Object, each key stores an address. JSON string
+          type: string
 
 security:
   - ApiKeyAuth: []
