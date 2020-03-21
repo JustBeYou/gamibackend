@@ -326,12 +326,278 @@ paths:
                 type: object
                 properties:
                   status:
-                    type: string
-                    
+                    type: string         
         '400':
           $ref: '#/components/responses/ServerError'
         '403':
           $ref: '#/components/responses/AuthError'      
+
+  /moduleCreate:
+    post:
+      tags:
+        - Module
+      description: Create module.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    allOf:
+                      - $ref: '#/components/schemas/Module'
+                      - $ref: '#/components/schemas/ModuleImage'
+                      - $ref: '#/components/schemas/ModuleVideo'
+                      - $ref: '#/components/schemas/ModuleList'
+                      - $ref: '#/components/schemas/ModuleText'
+                      - $ref: '#/components/schemas/ModuleContact'
+      
+      responses:
+        '200':
+          description: Created object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Module'
+
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'
+
+  /moduleList:
+    post:
+      tags:
+        - Module
+      description: List multiple modules using search filters. For time based searching take a look at TimeSearchFilter schema.
+      requestBody:
+        required: True
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    query:
+                      allOf:
+                        - $ref: '#/components/schemas/Module'
+                        - $ref: '#/components/schemas/ModuleImage'
+                        - $ref: '#/components/schemas/ModuleVideo'
+                        - $ref: '#/components/schemas/ModuleList'
+                        - $ref: '#/components/schemas/ModuleText'
+                        - $ref: '#/components/schemas/ModuleContact'
+      responses:
+        '200':
+          description: Found objects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Module'
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'  
+
+  /moduleModify:
+    post:
+      tags:
+        - Module
+      description: Modify module selected by id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    update:
+                      allOf:
+                        - $ref: '#/components/schemas/Module'
+                        - $ref: '#/components/schemas/ModuleImage'
+                        - $ref: '#/components/schemas/ModuleVideo'
+                        - $ref: '#/components/schemas/ModuleList'
+                        - $ref: '#/components/schemas/ModuleText'
+                        - $ref: '#/components/schemas/ModuleContact'
+                    
+      responses:
+        '200':
+          description: Modified object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    $ref: '#/components/schemas/Module'
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError'      
+
+  /moduleDelete:
+    post:
+      tags:
+        - Module
+      description: Delete modules selected by id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    
+      responses:
+        '200':
+          description: Just ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError' 
+
+  /moduleDisplay:
+    post:
+      tags:
+        - Module
+      description: Display module by id. An access code or a password may be needed. Concrete type fields will be contained in a sub-object named like the concrete type class. Ex. ModuleText
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    query:
+                      type: object
+                      properties:
+                        id: 
+                          type: integer
+                    
+      responses:
+        '200':
+          description: Found module.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    $ref: '#/components/schemas/Module'
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError' 
+  
+  /moduleAssociate:
+    post:
+      tags:
+        - Module
+      description: Associate a module with a collection.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    ModuleId:
+                      type: integer
+                    CollectionId:
+                      type: integer
+                    
+      responses:
+        '200':
+          description: Just ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError' 
+  
+  /moduleDeassociate:
+    post:
+      tags:
+        - Module
+      description: Deassociate a module from its parent collection.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    ModuleId:
+                      type: integer
+                    
+      responses:
+        '200':
+          description: Just ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError' 
 
 components:
   responses:
@@ -473,6 +739,8 @@ components:
         - CollectionId
         - type
       properties:
+        id:
+          type: integer
         CollectionId:
           description: Parent collection id.
           type: integer
@@ -506,15 +774,26 @@ components:
     ModuleVideo:
       type: object
       description: Concrete module for storing videos.
+      properties:
+        ModuleId:
+          description: Parent module id.
+          type: integer
 
     ModuleImage:
       type: object
       description: Concrete module for storing images.
+      properties:
+        ModuleId:
+          description: Parent module id.
+          type: integer
 
     ModuleList:
       type: object
       description: Concrete module for storing a list of links.
       properties:
+        ModuleId:
+          description: Parent module id.
+          type: integer
         icon:
           description: Icon filename
           type: string
@@ -529,6 +808,9 @@ components:
       type: object
       description: Concrete module for storing text data.
       properties:
+        ModuleId:
+          description: Parent module id.
+          type: integer
         text:
           description: Array of objects containing text and their font, size and other stylings. The clinet should decide the format. JSON string.
           type: string
@@ -537,6 +819,9 @@ components:
       type: object
       description: Concrete module for storing contact information.
       properties:
+        ModuleId:
+          description: Parent module id.
+          type: integer
         emails:
           description: Object, each key stores an email. JSON string
           type: string
@@ -547,6 +832,81 @@ components:
           description: Object, each key stores an address. JSON string
           type: string
 
+    FileInfo:
+      type: object
+      description: Database entry for uploaded files.
+      properties:
+        id:
+          type: integer
+        isOriginal:
+          description: True if this is the entry of the original uploaded file, not processed.
+          type: boolean
+        bucket:
+          description: Name of the bucket where the file is stored.
+          type: string
+        path:
+          description: Path name in the bucket.
+          type: string
+        filename:
+          description: Generated filename. (uuidv4)
+          type: string
+        originalFilename:
+          description: The original filename.
+          type: string
+        extension:
+          description: Extension of the file format.
+          type: string
+        sizeInBytes:
+          description: Size of the file, in bytes.
+          type: integer
+        resolutionInPixels:
+          description: Resolution in pixels, only one relevant dimension. (720p for example)
+          type: integer
+        orientation:
+          description: Orientation, relevant only for photos. 
+          type: string
+          enum:
+            - LANDSCAPE
+            - PORTRAIT
+        timeDuration:
+          description: Duration in seconds, relevant only for videos.
+          type: integer
+        FPS:
+          description: Frames per second.
+          type: integer
+        processingRanking:
+          description: Ranking used to determine the suited VM instance for processing. UNUSED at the moment.
+          type: integer
+        estimatedProcessingTimeInMinutes:
+          description: Estimated processing time. UNUSED at the moment.
+          type: integer
+        status:
+          type: string
+          enum:
+            - NOT_PROCESSED
+            - IN_QUEUE
+            - PROCESSED
+            - ORIGINAL
+        parentToken:
+          type: string
+        signedURL:
+          description: Cached signed URL for download.
+          type: string
+        isSignedURLValid:
+          description: True if the singed URL is true. TODO this should be removed, is not relevant
+          type: string
+        deleted:
+          description: True if the file was marked as deleted.
+          type: string
+        deletedByToken:
+          type: string
+        deletedAt:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string        
+
 security:
   - TokenAuth: []
   - AccessCodeAuth: []
@@ -556,6 +916,8 @@ tags:
     description: Identifier CRUD operations. Notice that some of the routes take as input or return ids. Ids are in general a single integer, but they can be an array of integers too (to specify multiple elements).
   - name: Collection
     description: Collection CRUD operations.
+  - name: Module
+    description: Module CRUD operations. Please take a look at the different module types schemas.
 
 servers:
   - description: SwaggerHub API Auto Mocking
