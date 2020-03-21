@@ -11,12 +11,14 @@ import { HasManyGetAssociationsMixin,
 const moduleImageModel = {};
 export class ModuleImageSchema extends Model {
     public id!: number;
+    public ModuleId!: number;
 }
 export class ModuleImage extends ModuleImageSchema {}
 
 const moduleVideoModel = {};
 export class ModuleVideoSchema extends Model {
     public id!: number;
+    public ModuleId!: number;
 }
 export class ModuleVideo extends ModuleVideoSchema {}
 
@@ -27,6 +29,7 @@ const moduleListModel = {
 };
 export class ModuleListSchema extends Model {
     public id!: number;
+    public ModuleId!: number;
     public icon!: string;
     public info!: string;
     public links!: string;
@@ -42,6 +45,7 @@ const moduleContactModel = {
 };
 export class ModuleContactSchema extends Model {
     public id!: number;
+    public ModuleId!: number;
     public emails!: string;
     public phoneNumbers!: string;
     public addresses!: string;
@@ -53,6 +57,7 @@ const moduleTextModel = {
 };
 export class ModuleTextSchema extends Model {
     public id!: number;
+    public ModuleId!: number;
     public text!: string;
 }
 export class ModuleText extends ModuleTextSchema {}

@@ -28,7 +28,10 @@ export function validateReference(reference: Module | null, token: string, isAdm
 }
 
 export function validateImmutable(properties: ModuleSchema & ConcreteModuleSchema) {
-    if (properties.id !== undefined || properties.type !== undefined || properties.CollectionId !== undefined) {
+    if (properties.id !== undefined || 
+        properties.type !== undefined || 
+        properties.CollectionId !== undefined ||
+        properties.ModuleId !== undefined) {
         throw new Error('id and type are immutable');
     }
 }
