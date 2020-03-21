@@ -336,7 +336,7 @@ paths:
     post:
       tags:
         - Module
-      description: Create module.
+      description: Create one or more modules. You MUST specify the concrete type. Concrete type fields can be included in the same object with other fields.
       requestBody:
         required: true
         content:
@@ -599,6 +599,284 @@ paths:
         '403':
           $ref: '#/components/responses/AuthError' 
 
+  /fileUpload:
+    post:
+      tags:
+        - File
+      description: |
+        To upload a file you must do a request to this route with the type and filename specified. 
+        The server will return a Google Storage Signed URL. 
+        Do a POST request to the Signed URL to start the upload transaction and the use PUT requests to the URL returned in the Location header to upload the file. 
+        Read the according specification on Google Storage API website. After uploading, the file will be added to the processing queue.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - video
+                        - image
+                        - text
+                    filename:
+                      type: string
+                    
+      responses:
+        '200':
+          description: Google Storage Signed URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError' 
+
+  /fileDownload:
+    post:
+      tags:
+        - File
+      description: Similar to uploading, do a request with the type and filename and you will receive a Google Storage Signed URL for downloading the file.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - video
+                        - image
+                        - text
+                    filename:
+                      type: string
+                    
+      responses:
+        '200':
+          description: Google Storage Signed URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError' 
+
+  /fileList:
+    post:
+      tags:
+        - File
+      description: Searching file metadata.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    query:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/FileInfo'
+                    
+      responses:
+        '200':
+          description: Found files.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FileInfo'
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError' 
+
+  /fileStaus:
+    post:
+      tags:
+        - File
+      description: Check processing status of a file.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    filename:
+                      type: string
+                    
+      responses:
+        '200':
+          description: The processing status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - NOT_PROCESSED
+                          - IN_QUEUE
+                          - PROCESSED
+                          - ORIGINAL
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError' 
+
+  /fileDelete:
+    post:
+      tags:
+        - File
+      description: Mark a file as deleted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    filename:
+                      type: string
+                    
+      responses:
+        '200':
+          description: Just ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError' 
+
+  /fileAssociate:
+    post:
+      tags:
+        - File
+      description: Associate a file with a module.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    filename:
+                      type: string
+                    ModuleId:
+                      type: string
+                    
+      responses:
+        '200':
+          description: Just ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError' 
+
+  /fileDeassociate:
+    post:
+      tags:
+        - File
+      description: Deassociate a file from its parent module.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    filename:
+                      type: string
+                    
+      responses:
+        '200':
+          description: Just ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+
+        '400':
+          $ref: '#/components/responses/ServerError'
+        '403':
+          $ref: '#/components/responses/AuthError' 
+
 components:
   responses:
     AuthError:
@@ -733,7 +1011,15 @@ components:
           default: false
 
     Module:
-      description: Building blocks of a Collection. Generic structure for multiple types of data.
+      description: |
+        Building blocks of a Collection. Generic structure for multiple types of data.
+        Modules are very diverse and the data types that they need to keep isn't uniform.
+        To solve this problem, there is a generic table named Module. Each Module entry holds a field
+        that describes its type and has a foreign key to a so named 'concrete module entry'. 
+        Each concrete module type has its own table. For example there is a ModuleContact for storing contact informations.
+        After sending a query to get a specific module, you want to access its concrete fields. To do this, you will find
+        in a sub-object with the same name as the concrete module type. For example to access the concrete data of a Module object named 
+        'moduleTest' of type CONTACT, you'll do like this 'moduleText.ModuleContact.<specific-field>'.
       type: object
       required:
         - CollectionId
@@ -918,6 +1204,8 @@ tags:
     description: Collection CRUD operations.
   - name: Module
     description: Module CRUD operations. Please take a look at the different module types schemas.
+  - name: File
+    description: Endpoints for managing files.
 
 servers:
   - description: SwaggerHub API Auto Mocking
