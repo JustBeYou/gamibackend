@@ -15,6 +15,11 @@ const permissionsOfMimeTypes = {
     text: 'ITEMS',
 } as DynamicObject;
 
+function getFilenameExtension(name: string) {
+    const tokens = name.split('.');
+    return tokens[tokens.length - 1];
+}
+
 router.post(
     '/',
     [
@@ -27,12 +32,14 @@ router.post(
 
         await errorHandlers.safeResponse(res, async() => {
             if (req.body.data.filename === undefined) throw new Error('Empty filename.');
+            if (req.body.data.filename.indexOf('.') === -1) throw new Error('No file extension specified.');
             const mimeType = req.body.data.type as string;
+            const extension = getFilenameExtension(req.body.data.filename);
         
             const haveMimeTypePermission = context.check(permissionsOfMimeTypes[mimeType]);
             if (haveMimeTypePermission === false) throw new Error('Not enough permissions.');
 
-            const fileName = uuid();
+            const fileName = `${uuid()}.${extension}`;
             const url = await storage.getSignedURL(
                 getDefaultBucket(),
                 fileName,
@@ -43,6 +50,7 @@ router.post(
             await fileCreationCache.set(fileName, {
                 parentToken: context.token,
                 originalFilename: req.body.data.filename,
+                extension: extension,
             } as FileCreationMetadata);
 
             const result = {

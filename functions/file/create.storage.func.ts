@@ -9,11 +9,19 @@ const processingFunctions: DynamicObject = {
     'image': addImageInQueue,
 };
 
+function replaceExtension(name: string, newExtension: string) {
+    const tokens = name.split('.');
+    const tokensNoExtension = tokens.splice(0, tokens.length - 1);
+    const newName = tokensNoExtension.join('.') + newExtension;
+    return newName;
+}
+
 async function addVideoInQueue(parentFile: FileInfo) {
+    const defaultVideoExtension = 'mp4';
     const resolutions = [480, 720, 1080];
 
     for (const resolution of resolutions) {
-        const newName = parentFile.filename + resolution.toString();
+        const newName = replaceExtension(parentFile.filename, `_${resolution.toString()}.${defaultVideoExtension}`);
 
         const newFile = await parentFile.createFileInfo({
             isOriginal: false,
@@ -32,6 +40,7 @@ async function addVideoInQueue(parentFile: FileInfo) {
 
         defaultJobsPool.add({
             filename: newName,
+            originalFilename: parentFile.filename,
             id: newFile.id,
             type: 'video',
             targetResolution: resolution,
@@ -43,10 +52,11 @@ async function addVideoInQueue(parentFile: FileInfo) {
 async function addImageInQueue(parentFile: FileInfo) {
     const resolutions = [720, 1080];
     const orientations = ['portrait', 'landscape'];
+    const defaultImageExtension = 'jpeg';
 
     for (const resolution of resolutions) {
         for (const orientation of orientations) {
-            const newName = parentFile.filename + resolution.toString() + orientation;
+            const newName = replaceExtension(parentFile.filename, `_${resolution.toString()}_${orientation}.${defaultImageExtension}`);
 
             const newFile = await parentFile.createFileInfo({
                 isOriginal: false,
@@ -65,6 +75,7 @@ async function addImageInQueue(parentFile: FileInfo) {
     
             defaultJobsPool.add({
                 filename: newName,
+                originalFilename: parentFile.filename,
                 id: newFile.id,
                 type: 'image',
                 targetResolution: resolution,
@@ -82,6 +93,7 @@ export default async function(fileMetadata: ObjectMetadata) {
         bucket: fileMetadata.bucket,
         originalFilename: originalMetadata.originalFilename,
         filename: fileMetadata.name,
+        extension: originalMetadata.extension,
         sizeInBytes: fileMetadata.size,
         status: 'ORIGINAL',
         parentToken: originalMetadata.parentToken,
